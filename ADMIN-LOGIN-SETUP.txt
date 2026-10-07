@@ -1,0 +1,17 @@
+LOTUS INN ADMIN LOGIN
+=====================
+
+Admin URL:
+  /admin/login
+
+Local fallback password:
+  LotusInn@2026!
+
+IMPORTANT FOR LIVE DEPLOYMENT:
+Set these environment variables on the hosting platform:
+  ADMIN_PASSWORD=your-strong-password
+  ADMIN_SESSION_SECRET=your-long-random-secret
+
+The admin session is stored in an HttpOnly cookie. Admin pages and /api/admin/* routes are protected by middleware.
+
+For this project, blog/author data is stored in JSON files under /data. This works on a writable Node/self-hosted server. Serverless hosts such as Vercel do not provide persistent writable application storage, so publishing from the dashboard should use a database or persistent storage before relying on it in production.

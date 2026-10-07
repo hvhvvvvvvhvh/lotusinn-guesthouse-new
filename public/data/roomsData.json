@@ -1,0 +1,548 @@
+{
+  "roomsPage": {
+    "hero": {
+      "title": "Our Rooms",
+      "subtitle": "Your Comfort Awaits in Mirpur."
+    },
+    "filters": {
+      "types": [
+        "Room Type",
+        "Deluxe",
+        "Family",
+        "Standard"
+      ],
+      "prices": [
+        "Price Range",
+        "Rs 3000 - 5000",
+        "Rs 5000 - 8000"
+      ]
+    },
+    "masterTitle": "Hotel Master Rooms",
+    "masterSubtitle": "Spacious rooms offering comfort and elegance",
+    "masterRooms": [
+      {
+        "slug": "deluxe",
+        "image": "/images/DSC_0271.JPG",
+        "tag": "Twin Room",
+        "title": "Twin Bedroom",
+        "description": "Comfortable room with two single beds,Wi-Fi,private bath,and LED TV.",
+        "badges": [
+          {
+            "icon": "fa-solid fa-wifi",
+            "label": "WiFi"
+          },
+          {
+            "icon": "fa-solid fa-snowflake",
+            "label": "AC"
+          },
+          {
+            "icon": "fa-solid fa-bed",
+            "label": "Bed"
+          }
+        ],
+        "price": "Rs 4500 / night",
+        "availability": "Available",
+        "roomNumber": "101"
+      },
+      {
+        "slug": "family",
+        "image": "/images/DSC_0260.JPG",
+        "tag": "Family Room",
+        "title": "Premium Family Room",
+        "description": "Perfect for families with double & single beds, modern facilities.",
+        "badges": [
+          {
+            "icon": "fa-solid fa-wifi",
+            "label": "WiFi"
+          },
+          {
+            "icon": "fa-solid fa-snowflake",
+            "label": "AC"
+          },
+          {
+            "icon": "fa-solid fa-bed",
+            "label": "Bed"
+          }
+        ],
+        "price": "Rs 6,000 / night",
+        "availability": "Booked",
+        "roomNumber": "102"
+      },
+      {
+        "slug": "standard",
+        "image": "/images/DSC_0267.JPG",
+        "tag": "Deluxe",
+        "title": "Double Deluxe Room",
+        "description": "Elegant room with luxury bed, modern interior and peaceful stay.",
+        "badges": [
+          {
+            "icon": "fa-solid fa-wifi",
+            "label": "WiFi"
+          },
+          {
+            "icon": "fa-solid fa-snowflake",
+            "label": "AC"
+          },
+          {
+            "icon": "fa-solid fa-bed",
+            "label": "Bed"
+          }
+        ],
+        "price": "Rs 8,000 / night",
+        "availability": "Booked",
+        "roomNumber": "103"
+      }
+    ],
+    "availableTitle": "Available Rooms",
+    "availableRooms": [
+      {
+        "slug": "deluxe",
+        "image": "/images/IMG_3471.JPG",
+        "tag": "Deluxe",
+        "title": "Deluxe Room",
+        "description": "Spacious deluxe room with modern interior and luxury feel.",
+        "iconOnly": [
+          "fa-solid fa-wifi",
+          "fa-solid fa-snowflake",
+          "fa-solid fa-car",
+          "fa-solid fa-bell-concierge"
+        ],
+        "price": "Rs 7,000 / night",
+        "availability": "Available",
+        "roomNumber": "101"
+      },
+      {
+        "slug": "family",
+        "image": "/images/IMG_3465.JPG",
+        "tag": "Family",
+        "title": "Family Room",
+        "description": "Perfect for families with multiple beds and full comfort.",
+        "iconOnly": [
+          "fa-solid fa-wifi",
+          "fa-solid fa-tv",
+          "fa-solid fa-bed",
+          "fa-solid fa-bath"
+        ],
+        "price": "Rs 9,000 / night",
+        "availability": "Booked",
+        "roomNumber": "102"
+      },
+      {
+        "slug": "standard",
+        "image": "/images/DSC_0264.JPG",
+        "tag": "Standard",
+        "title": "Standard Room",
+        "description": "Affordable and comfortable stay for short visits.",
+        "iconOnly": [
+          "fa-solid fa-wifi",
+          "fa-solid fa-fan",
+          "fa-solid fa-bed",
+          "fa-solid fa-bell-concierge"
+        ],
+        "price": "Rs 4,500 / night",
+        "availability": "Booked",
+        "roomNumber": "103"
+      }
+    ],
+    "amenitiesTitle": "Room Amenities",
+    "amenities": [
+      "📶 Free Wi-Fi",
+      "❄️ Air Conditioning",
+      "🛏️ Comfortable Beds",
+      "🚿 Attached Bathroom",
+      "📺 LED TV",
+      "🅿️ Free Parking"
+    ],
+    "facilitiesTitle": "Room Facilities",
+    "facilities": [
+      {
+        "icon": "fa-solid fa-wifi",
+        "label": "Free Wi-Fi"
+      },
+      {
+        "icon": "fa-solid fa-utensils",
+        "label": "Breakfast"
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "label": "Security"
+      },
+      {
+        "icon": "fa-solid fa-car",
+        "label": "Parking"
+      },
+      {
+        "icon": "fa-solid fa-broom",
+        "label": "Cleaning"
+      },
+      {
+        "icon": "fa-solid fa-headset",
+        "label": "Support"
+      }
+    ],
+    "whyChooseTitle": "Why Choose Our Rooms?",
+    "whyChoose": [
+      {
+        "title": "✔ Clean & Hygienic",
+        "text": "We maintain high cleanliness standards for every guest."
+      },
+      {
+        "title": "✔ Affordable Pricing",
+        "text": "Best value rooms in Mirpur for your budget."
+      },
+      {
+        "title": "✔ Prime Location",
+        "text": "Located in the heart of the city with easy access."
+      }
+    ],
+    "whyStayTitle": "Why Stay With Us?",
+    "whyStay": [
+      {
+        "icon": "fa-solid fa-star",
+        "title": "Top Rated",
+        "text": "Highly rated by our happy guests."
+      },
+      {
+        "icon": "fa-solid fa-location-dot",
+        "title": "Best Location",
+        "text": "Located in prime area of Mirpur."
+      },
+      {
+        "icon": "fa-solid fa-wallet",
+        "title": "Affordable",
+        "text": "Best prices with premium quality."
+      }
+    ],
+    "cta": {
+      "title": "Ready to Book?",
+      "label": "Book Your Room Now",
+      "href": "/book-now"
+    },
+    "amenitiesShowcase": {
+      "title": "Popular Room Amenities",
+      "subtitle": "Our most requested in-room essentials and meal options.",
+      "items": [
+        {
+          "icon": "fa-solid fa-wifi",
+          "title": "High-Speed Wi-Fi",
+          "text": "Fast complimentary internet in all rooms."
+        },
+        {
+          "icon": "fa-solid fa-snowflake",
+          "title": "Air Conditioning",
+          "text": "Cooling comfort for every season."
+        },
+        {
+          "icon": "fa-solid fa-mug-hot",
+          "title": "Tea & Coffee Setup",
+          "text": "Kettle, sachets and bottled water included."
+        },
+        {
+          "icon": "fa-solid fa-utensils",
+          "title": "Meals Available",
+          "text": "Breakfast, lunch and dinner can be added."
+        }
+      ],
+      "mealPlans": [
+        {
+          "title": "Breakfast",
+          "price": "PKR 850"
+        },
+        {
+          "title": "Lunch",
+          "price": "PKR 1,350"
+        },
+        {
+          "title": "Dinner",
+          "price": "PKR 1,650"
+        }
+      ],
+      "buttonLabel": "View Full Amenities",
+      "buttonHref": "/amenities"
+    }
+  },
+  "roomDetails": {
+    "deluxe": {
+      "name": "Double Deluxe Room",
+      "heroSubtitle": "Perfect for families with multiple beds and full comfort.",
+      "price": "Rs 8,000 / night",
+      "images": [
+        "https://kinsley.bslthemes.com/city/wp-content/uploads/sites/6/2021/12/rom-pic-5-1536x1024.jpg"
+      ],
+      "desc": "Elegant room with luxury bed, modern interior and peaceful stay.",
+      "icons": [
+        {
+          "icon": "fa-solid fa-bed",
+          "label": "King Bed"
+        },
+        {
+          "icon": "fa-solid fa-bath",
+          "label": "Bathroom"
+        },
+        {
+          "icon": "fa-solid fa-wifi",
+          "label": "WiFi"
+        },
+        {
+          "icon": "fa-solid fa-tv",
+          "label": "TV"
+        }
+      ],
+      "facilities": [
+        "✔ Air Conditioning",
+        "✔ Free WiFi",
+        "✔ LED TV",
+        "✔ Parking",
+        "✔ Room Service",
+        "✔ Cleaning"
+      ],
+      "reviews": [
+        {
+          "rating": "⭐ ⭐ ⭐ ⭐ ⭐",
+          "text": "Very clean and comfortable stay.",
+          "name": "Ahmed Raza"
+        },
+        {
+          "rating": "⭐ ⭐ ⭐ ⭐",
+          "text": "Good location and friendly staff.",
+          "name": "Sadia Khan"
+        }
+      ],
+      "amenities": [
+        "Complimentary toiletries",
+        "Free Wi-Fi",
+        "Air conditioning",
+        "Flat-screen TV",
+        "Coffee/tea setup"
+      ],
+      "availability": "Available"
+    },
+    "family": {
+      "name": "Family Room",
+      "heroSubtitle": "Perfect for families with multiple beds and full comfort.",
+      "price": "Rs 9,000 / night",
+      "images": [
+        "https://kinsley.bslthemes.com/city/wp-content/uploads/sites/6/2021/12/rom-pic-3-1536x1019.jpg"
+      ],
+      "desc": "Perfect for families with multiple beds and full comfort.",
+      "icons": [
+        {
+          "icon": "fa-solid fa-bed",
+          "label": "King Bed"
+        },
+        {
+          "icon": "fa-solid fa-bath",
+          "label": "Bathroom"
+        },
+        {
+          "icon": "fa-solid fa-wifi",
+          "label": "WiFi"
+        },
+        {
+          "icon": "fa-solid fa-tv",
+          "label": "TV"
+        }
+      ],
+      "facilities": [
+        "✔ Air Conditioning",
+        "✔ Free WiFi",
+        "✔ LED TV",
+        "✔ Parking",
+        "✔ Room Service",
+        "✔ Cleaning"
+      ],
+      "reviews": [
+        {
+          "rating": "⭐ ⭐ ⭐ ⭐ ⭐",
+          "text": "Very clean and comfortable stay.",
+          "name": "Ahmed Raza"
+        },
+        {
+          "rating": "⭐ ⭐ ⭐ ⭐",
+          "text": "Good location and friendly staff.",
+          "name": "Sadia Khan"
+        }
+      ],
+      "amenities": [
+        "Complimentary toiletries",
+        "Free Wi-Fi",
+        "Air conditioning",
+        "Flat-screen TV",
+        "Coffee/tea setup"
+      ],
+      "availability": "Booked"
+    },
+    "standard": {
+      "name": "Standard Room",
+      "heroSubtitle": "Perfect for families with multiple beds and full comfort.",
+      "price": "Rs 4,500 / night",
+      "images": [
+        "https://kinsley.bslthemes.com/city/wp-content/uploads/sites/6/2021/12/rom-pic-3-1536x1019.jpg"
+      ],
+      "desc": "Affordable and comfortable stay for short visits.",
+      "icons": [
+        {
+          "icon": "fa-solid fa-bed",
+          "label": "King Bed"
+        },
+        {
+          "icon": "fa-solid fa-bath",
+          "label": "Bathroom"
+        },
+        {
+          "icon": "fa-solid fa-wifi",
+          "label": "WiFi"
+        },
+        {
+          "icon": "fa-solid fa-tv",
+          "label": "TV"
+        }
+      ],
+      "facilities": [
+        "✔ Air Conditioning",
+        "✔ Free WiFi",
+        "✔ LED TV",
+        "✔ Parking",
+        "✔ Room Service",
+        "✔ Cleaning"
+      ],
+      "reviews": [
+        {
+          "rating": "⭐ ⭐ ⭐ ⭐ ⭐",
+          "text": "Very clean and comfortable stay.",
+          "name": "Ahmed Raza"
+        },
+        {
+          "rating": "⭐ ⭐ ⭐ ⭐",
+          "text": "Good location and friendly staff.",
+          "name": "Sadia Khan"
+        }
+      ],
+      "amenities": [
+        "Complimentary toiletries",
+        "Free Wi-Fi",
+        "Air conditioning",
+        "Flat-screen TV",
+        "Coffee/tea setup"
+      ],
+      "availability": "Booked"
+    }
+  },
+  "bookingBenefits": [
+    "No Booking Fee",
+    "Free Cancellation",
+    "Best Price Guarantee"
+  ],
+  "amenitiesPage": {
+    "hero": {
+      "title": "Room Amenities",
+      "subtitle": "Comfort, convenience and thoughtful services designed for a better stay at Lotus Inn Guest House."
+    },
+    "intro": {
+      "label": "Guest Comfort",
+      "title": "Everything You Need For A Relaxing Stay",
+      "text": "Hotel room amenities are complimentary items and services designed to enhance guest comfort, from expected daily essentials to premium in-room conveniences and dining upgrades."
+    },
+    "essentialTitle": "Essential In-Room Amenities",
+    "essentialText": "Expected room essentials for every Lotus Inn guest.",
+    "essential": [
+      {
+        "title": "Toiletries",
+        "text": "Shampoo, conditioner, body wash, soap, lotion, dental kit and shaving kit.",
+        "price": "Included"
+      },
+      {
+        "title": "Comfort & Care",
+        "text": "Hairdryer, iron, ironing board, hangers and tissue boxes.",
+        "price": "Included"
+      },
+      {
+        "title": "Technology & Comfort",
+        "text": "High-speed Wi-Fi, air conditioning, room safe and flat-screen TV.",
+        "price": "Included"
+      },
+      {
+        "title": "Refreshments",
+        "text": "Tea/coffee setup, kettle and complimentary bottled water.",
+        "price": "Included"
+      }
+    ],
+    "premiumTitle": "Elevated & Premium Amenities",
+    "premiumText": "Enhanced options for guests who want extra comfort and experience.",
+    "premium": [
+      {
+        "title": "Comfort Upgrades",
+        "text": "Bathrobes, slippers and premium bedding for selected rooms.",
+        "price": "From PKR 1,500"
+      },
+      {
+        "title": "Entertainment",
+        "text": "Smart TV streaming support and Bluetooth speaker access.",
+        "price": "From PKR 1,000"
+      },
+      {
+        "title": "In-Room Convenience",
+        "text": "Mini refrigerator, microwave or kitchenette in selected stays.",
+        "price": "From PKR 2,500"
+      },
+      {
+        "title": "Experience Add-ons",
+        "text": "Balcony view setup, local décor styling and aromatherapy packs.",
+        "price": "From PKR 2,000"
+      }
+    ],
+    "mealPlansTitle": "Dining & Meal Plans",
+    "mealPlansText": "Flexible meal options for business, family and long-stay guests.",
+    "mealPlans": [
+      {
+        "title": "Breakfast",
+        "text": "Fresh breakfast with tea, eggs, paratha or continental option.",
+        "price": "PKR 850 / guest"
+      },
+      {
+        "title": "Lunch",
+        "text": "Traditional and fast meal choices with beverage service.",
+        "price": "PKR 1,350 / guest"
+      },
+      {
+        "title": "Dinner",
+        "text": "Comfort dining with desi and continental menu selections.",
+        "price": "PKR 1,650 / guest"
+      },
+      {
+        "title": "Full Board",
+        "text": "Breakfast, lunch and dinner for day-long convenience.",
+        "price": "PKR 3,500 / guest"
+      }
+    ],
+    "servicesTitle": "Property Services",
+    "servicesText": "Support services commonly expected by guest house travelers.",
+    "services": [
+      {
+        "title": "Daily Housekeeping",
+        "text": "Clean, refreshed rooms every day.",
+        "price": "Included"
+      },
+      {
+        "title": "Room Service",
+        "text": "Quick in-room assistance and meal delivery.",
+        "price": "Available"
+      },
+      {
+        "title": "Free Secure Parking",
+        "text": "Safe onsite parking for guests and families.",
+        "price": "Included"
+      },
+      {
+        "title": "24/7 Front Desk",
+        "text": "Always-on support, luggage help and guidance.",
+        "price": "Included"
+      }
+    ],
+    "cta": {
+      "title": "Need a room with premium extras?",
+      "label": "Book Your Stay",
+      "href": "/book-now"
+    }
+  }
+}

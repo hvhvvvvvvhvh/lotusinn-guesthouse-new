@@ -1,0 +1,25 @@
+LOTUS INN BLOG CMS - CLEAN SOURCE PACKAGE
+
+IMPORTANT
+This package intentionally does NOT include node_modules or .next. The previous package included those generated/dependency folders, which made the ZIP very large and could cause Windows extraction problems.
+
+1. Extract this entire folder normally in Windows.
+2. Open Command Prompt / PowerShell inside this project folder.
+3. Run: npm install
+4. Run: npm run dev
+5. Open: http://localhost:3000
+
+Blog Admin URLs
+- /admin/blogs
+- /admin/blogs/new
+- /admin/authors
+- /admin/authors/new
+
+Public Blog URLs
+- /blog
+- /blog/[slug]
+- /authors/[slug]
+
+The existing Lotus Inn rooms, bookings, availability, expenses, amenities and messages modules are preserved.
+
+Do not copy individual files from the ZIP. Extract the complete project folder so components/Layout.jsx, components/AdminLayout.jsx, pages/_app.js and all other source files stay together.

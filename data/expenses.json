@@ -1,0 +1,22 @@
+{
+  "expenses": [
+    {
+      "id": "exp-1",
+      "title": "Kitchen Groceries",
+      "category": "Kitchen",
+      "amount": 12000,
+      "date": "2026-04-27",
+      "paymentMethod": "Cash",
+      "note": "Daily kitchen items and breakfast supplies"
+    },
+    {
+      "id": "exp-2",
+      "title": "Generator Fuel",
+      "category": "Fuel",
+      "amount": 8000,
+      "date": "2026-04-27",
+      "paymentMethod": "Cash",
+      "note": "Fuel expense for backup generator"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+import Head from 'next/head';
+import Link from 'next/link';
+import { getBlogs, getAuthors } from '../../lib/blogStore';
+
+export async function getServerSideProps({ params }) {
+  const [blogs, authors] = await Promise.all([getBlogs(), getAuthors()]);
+  const publishedBlogs = blogs
+    .filter((b) => b.status === 'Published')
+    .sort((a, b) => String(b.publishDate || '').localeCompare(String(a.publishDate || '')));
+  const blog = publishedBlogs.find((b) => b.slug === params.slug);
+  if (!blog) return { notFound: true };
+
+  return {
+    props: {
+      blog,
+      author: authors.find((a) => a.id === blog.authorId) || null,
+      related: publishedBlogs.filter((b) => b.id !== blog.id).slice(0, 5),
+    },
+  };
+}
+
+function readingTime(blog) {
+  const text = [blog.title, blog.excerpt, ...(blog.blocks || []).map((b) => [b.text, ...(b.items || []), b.question, b.answer].filter(Boolean).join(' '))].join(' ');
+  return Math.max(1, Math.ceil(text.trim().split(/\s+/).filter(Boolean).length / 200));
+}
+
+export default function BlogDetail({ blog, author, related }) {
+  const description = blog.metaDescription || blog.excerpt || `Read ${blog.title} from Lotus Inn Guest House.`;
+  const minutes = readingTime(blog);
+
+  return (
+    <>
+      <Head>
+        <title>{blog.metaTitle || `${blog.title} | Lotus Inn Guest House`}</title>
+        <meta name="description" content={description.slice(0, 160)} />
+        {blog.keywords && <meta name="keywords" content={blog.keywords} />}
+      </Head>
+
+      <main className="lotus-article-page">
+        <div className="lotus-article-breadcrumbs">
+          <Link href="/">Home</Link><span>›</span><Link href="/blog">Blog</Link><span>›</span><span>{blog.category || 'Travel Guide'}</span>
+        </div>
+
+        <section className="lotus-article-shell">
+          <article className="lotus-article-main">
+                        {blog.featuredImage && (
+              <figure className="lotus-article-featured-wrap">
+                <img className="lotus-article-featured" src={blog.featuredImage} alt={blog.title} />
+              </figure>
+            )}
+            <header className="lotus-article-header">
+              <div className="lotus-post-meta"><span>{blog.category || 'Travel Guide'}</span><b>•</b><span>{blog.publishDate || ''}</span><b>•</b><span>{minutes} min read</span></div>
+              <h1>{blog.title}</h1>
+              {/* {blog.excerpt && <p className="lotus-article-excerpt">{blog.excerpt}</p>} */}
+
+              <div className="lotus-article-author-row">
+                <div className="lotus-article-author">
+                  {author?.image ? <img src={author.image} alt={author.name} /> : <div className="lotus-author-fallback">{String(author?.name || 'L').charAt(0).toUpperCase()}</div>}
+                  <div><strong>{author?.name || 'Lotus Inn Team'}</strong><span>{author?.role || 'Lotus Inn Guest House'}</span></div>
+                </div>
+                <Link className="lotus-back-blog" href="/blog">All Guides</Link>
+              </div>
+            </header>
+
+
+
+            <div className="lotus-article-content">
+              {(blog.blocks || []).map((block, index) => <Block key={`${block.id || block.type}-${index}`} block={block} />)}
+            </div>
+
+            <div className="lotus-article-bottom-cta">
+              <div><span>LOTUS INN GUEST HOUSE</span><strong>Planning your visit to Mirpur?</strong><p>Book a comfortable room and enjoy a convenient stay at Lotus Inn.</p></div>
+              <Link href="/book-now">Book Your Stay</Link>
+            </div>
+          </article>
+
+          <aside className="lotus-article-sidebar">
+            <div className="lotus-sidebar-card lotus-sticky-card">
+              <div className="lotus-sidebar-title"><span className="lotus-eyebrow">KEEP READING</span><h3>Latest Articles</h3></div>
+              <div className="lotus-sidebar-list">
+                {related.map((item) => (
+                  <Link href={`/blog/${item.slug}`} key={item.id} className="lotus-sidebar-item">
+                    {item.featuredImage ? <img src={item.featuredImage} alt="" /> : <div className="lotus-sidebar-fallback">L</div>}
+                    <div><strong>{item.title}</strong><small>{item.publishDate}</small></div>
+                  </Link>
+                ))}
+                {!related.length && <p className="lotus-sidebar-empty">More articles will appear here soon.</p>}
+              </div>
+            </div>
+
+            <div className="lotus-sidebar-card lotus-sidebar-cta">
+              <span className="lotus-eyebrow">EXPLORE LOTUS INN</span>
+              <h3>Find the right room for your stay</h3>
+              <p>Explore our rooms and amenities before you book your visit to Mirpur.</p>
+              <Link href="/rooms">Explore Rooms</Link>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </>
+  );
+}
+
+function Block({ block }) {
+  if (!block) return null;
+  if (block.type === 'heading2') return <h2>{block.text}</h2>;
+  if (block.type === 'heading3') return <h3>{block.text}</h3>;
+  if (block.type === 'bullet' || block.type === 'numbered') {
+    const Tag = block.type === 'bullet' ? 'ul' : 'ol';
+    return <Tag>{(block.items || []).filter(Boolean).map((item, i) => <li key={i}>{item}</li>)}</Tag>;
+  }
+  if (block.type === 'link') return block.url ? <div className="lotus-inline-cta"><a href={block.url} target={block.url.startsWith('http') ? '_blank' : undefined} rel={block.url.startsWith('http') ? 'noreferrer' : undefined}>{block.label || block.url}</a></div> : null;
+  if (block.type === 'image') return block.url ? <figure className="lotus-content-image"><img src={block.url} alt={block.alt || ''} /><figcaption>{block.alt || ''}</figcaption></figure> : null;
+  if (block.type === 'faq') return <details className="lotus-faq"><summary>{block.question || 'Frequently asked question'}</summary><div>{block.answer}</div></details>;
+  return block.text ? <p>{block.text}</p> : null;
+}

@@ -1,0 +1,641 @@
+{
+  "layout": {
+    "header": {
+      "logo": "/images/LotusInnLogo.png",
+      "menu": [
+        {
+          "label": "Home",
+          "path": "/"
+        },
+        {
+          "label": "Rooms",
+          "path": "/rooms"
+        },
+        {
+          "label": "About",
+          "path": "/about"
+        },
+        {
+          "label": "Gallery",
+          "path": "/gallery"
+        },
+        {
+          "label": "Amenities",
+          "path": "/amenities"
+        },
+        {
+          "label": "Contact",
+          "path": "/contact"
+        }
+      ],
+      "bookNow": {
+        "label": "Book Now",
+        "href": "/book-now"
+      }
+    },
+    "footer": {
+      "quickLinks": [
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "Rooms",
+          "href": "/rooms"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Blog",
+          "href": "/blog"
+        },
+        {
+          "label": "Contact Us",
+          "href": "/contact"
+        }
+      ],
+      "contact": {
+        "address": "Kotli Rd, New Mirpur City, Azad Jammu And Kashmir, 10250",
+        "phone": "+92 346 3260347",
+        "landline": "058274 39595",
+        "email": "info@lotusinnguesthouse.com"
+      },
+      "socials": [
+        {
+          "href": "https://www.facebook.com/profile.php?id=100063767985114",
+          "icon": "fa-brands fa-facebook"
+        },
+        {
+          "href": "https://www.instagram.com/lotusinnguesthouse/",
+          "icon": "fa-brands fa-instagram"
+        },
+        {
+          "href": "https://x.com/",
+          "icon": "fa-brands fa-x-twitter"
+        },
+        {
+          "href": "https://wa.me/923463260347",
+          "icon": "fa-brands fa-whatsapp"
+        }
+      ],
+      "copyright": "© 2026 Lotus Inn Guest House, All Rights Reserved."
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Welcome to Lotus Inn Guest House",
+      "subtitle": "Your Comfort Awaits in Mirpur.",
+      "bookingPlaceholders": [
+        "📅 Check-in",
+        "📅 Check-out",
+        "👤 Guests"
+      ],
+      "bookingButton": {
+        "label": "Check Availability",
+        "href": "/book-now"
+      }
+    },
+    "rooms": {
+      "title": "Our Rooms",
+      "subtitle": "Relax in Our Stylish Accommodations",
+      "cards": [
+        {
+          "image": "/images/DSC_0260.JPG",
+          "title": "Deluxe Room",
+          "price": "From PKR 5,000 / Night",
+          "link": "/room/deluxe",
+          "linkLabel": "View Details"
+        },
+        {
+          "image": "/images/DSC_0264.JPG",
+          "title": "Executive Room",
+          "price": "From PKR 8,000 / Night",
+          "link": "/room/family",
+          "linkLabel": "View Details"
+        },
+        {
+          "image": "/images/DSC_0267.JPG",
+          "title": "Standard Room",
+          "price": "From PKR 9,000 / Night",
+          "link": "/room/standard",
+          "linkLabel": "View Details"
+        }
+      ]
+    },
+    "amenities": {
+      "title": "Amenities & Services",
+      "subtitle": "Enjoy Our Top Facilities",
+      "items": [
+        {
+          "icon": "fa-solid fa-wifi",
+          "label": "Free Wi-Fi"
+        },
+        {
+          "icon": "fa-solid fa-hamburger",
+          "label": "Breakfast Included"
+        },
+        {
+          "icon": "fas fa-shield-alt",
+          "label": "24-Hour Security"
+        },
+        {
+          "icon": "fas fa-taxi",
+          "label": "Airport Transfer"
+        },
+        {
+          "icon": "fas fa-hotel",
+          "label": "Room Service"
+        }
+      ]
+    },
+    "gallery": {
+      "title": "Photo Gallery",
+      "subtitle": "Explore Our Guest House",
+      "images": [
+        "/images/DSC_0236.JPG",
+        "/images/DSC_0266.JPG",
+        "/images/DSC_0263.JPG",
+        "/images/IMG_3424.JPG"
+      ]
+    },
+    "reviews": {
+      "title": "Guest Reviews",
+      "subtitle": "What Our Guests Say",
+      "groups": [
+        [
+          {
+            "image": "https://randomuser.me/api/portraits/men/32.jpg",
+            "text": "Great place to stay! Very clean and comfortable.The satff was sincerely helpful.",
+            "name": "Ahmed Raza",
+            "rating": "⭐⭐⭐⭐⭐"
+          },
+          {
+            "image": "https://randomuser.me/api/portraits/women/44.jpg",
+            "text": "We stayed here with our family and are fully satisfied with our vacation. Rooms are very modern, have all needed amenities.",
+            "name": "Sadia Khan",
+            "rating": "⭐⭐⭐⭐⭐"
+          }
+        ],
+        [
+          {
+            "image": "https://randomuser.me/api/portraits/men/11.jpg",
+            "text": "We stayed here with our family and are fully satisfied with our vacation. Rooms are very modern, have all needed amenities.",
+            "name": "Ali Khan",
+            "rating": "⭐⭐⭐⭐⭐"
+          },
+          {
+            "image": "https://randomuser.me/api/portraits/women/65.jpg",
+            "text": "We stayed here with our family and are fully satisfied with our vacation. Rooms are very modern, have all needed amenities.",
+            "name": "Hina Ali",
+            "rating": "⭐⭐⭐⭐⭐"
+          }
+        ]
+      ]
+    },
+    "blog": {
+      "title": "Latest Blog",
+      "subtitle": "Tips, Travel Guides & Updates",
+      "posts": [
+        {
+          "image": "/images/IMG_1595.JPG",
+          "title": "Discover Comfort and Elegance at Lotus Inn",
+          "excerpt": "Explore the most beautiful attractions and must-visit places during...",
+          "link": "/rooms",
+          "linkLabel": "Read More"
+        },
+        {
+          "image": "/images/DSC_0271.JPG",
+          "title": "Travel Tips for Comfortable Stay",
+          "excerpt": "Make your trip stress-free with these simple and effective travel tips.",
+          "link": "/amenities",
+          "linkLabel": "Read More"
+        },
+        {
+          "image": "/images/DSC_0242.JPG",
+          "title": "Why Choose Lotus Inn Guest House?",
+          "excerpt": "Discover what makes Lotus Inn the best guest house in Mirpur.",
+          "link": "/book-now",
+          "linkLabel": "Read More"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to Book Your Stay?",
+      "label": "Reserve Your Room Today",
+      "href": "/book-now"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "About Us",
+      "subtitle": "Lotus Inn Guest House offers comfort and luxury in Mirpur with modern facilities and excellent service."
+    },
+    "intro": {
+      "images": [
+        "/images/DSC_0233.JPG",
+        "/images/DSC_0232.JPG"
+      ],
+      "title": "Welcome to Lotus Inn Guest House",
+      "text": "Lotus Inn offers a perfect blend of comfort, elegance, and affordability. Located in the heart of Mirpur, we provide a peaceful environment for families, business travelers, and tourists.",
+      "buttonLabel": "Explore Rooms",
+      "buttonHref": "/rooms"
+    },
+    "amenities": {
+      "title": "Our Amenities",
+      "items": [
+        {
+          "icon": "fa-solid fa-wifi",
+          "label": "Free WiFi"
+        },
+        {
+          "icon": "fa-solid fa-car",
+          "label": "Parking"
+        },
+        {
+          "icon": "fa-solid fa-utensils",
+          "label": "Breakfast"
+        },
+        {
+          "icon": "fa-solid fa-snowflake",
+          "label": "AC Rooms"
+        },
+        {
+          "icon": "fa-solid fa-shield",
+          "label": "Security"
+        },
+        {
+          "icon": "fa-solid fa-bell",
+          "label": "Room Service"
+        },
+        {
+          "icon": "fas fa-taxi",
+          "label": "Airport Transfer"
+        },
+        {
+          "icon": "fa-solid fa-headset",
+          "label": "Support"
+        }
+      ]
+    },
+    "roomsPreview": {
+      "title": "Rooms & Suites",
+      "cards": [
+        {
+          "image": "/images/DSC_0260.JPG",
+          "title": "Deluxe Room",
+          "price": "Rs 7,000 / night"
+        },
+        {
+          "image": "/images/DSC_0266.JPG",
+          "title": "Family Room",
+          "price": "Rs 9,000 / night"
+        },
+        {
+          "image": "/images/DSC_0271.JPG",
+          "title": "Standard Room",
+          "price": "Rs 4,500 / night"
+        }
+      ]
+    },
+    "testimonial": {
+      "title": "What Our Guests Say",
+      "text": "We had a wonderful stay at Lotus Inn. The rooms were clean, comfortable and the staff was very friendly.",
+      "name": "Ahmed Raza"
+    },
+    "hospitality": {
+      "image": "/images/IMG_3417.JPG",
+      "title": "Our Hospitality",
+      "text": "We focus on providing excellent service, modern facilities, and a relaxing environment for every guest.",
+      "items": [
+        "Comfortable Rooms",
+        "24/7 Support",
+        "Prime Location"
+      ]
+    },
+    "gallery": {
+      "title": "Photo Gallery",
+      "images": [
+        "/images/DSC_0271.JPG",
+        "/images/DSC_0267.JPG",
+        "/images/DSC_0260.JPG",
+        "/images/DSC_0242.JPG"
+      ]
+    }
+  },
+  "galleryPage": {
+    "hero": {
+      "title": "Our Gallery",
+      "subtitle": "Photos of our guest house"
+    },
+    "filters": [
+      {
+        "label": "All",
+        "value": "all"
+      },
+      {
+        "label": "Rooms",
+        "value": "room"
+      },
+      {
+        "label": "Lobby",
+        "value": "lobby"
+      },
+      {
+        "label": "Restaurant",
+        "value": "restaurant"
+      }
+    ],
+    "images": [
+      {
+        "src": "/images/DSC_0271.JPG",
+        "category": "room"
+      },
+      {
+        "src": "/images/DSC_0232.JPG",
+        "category": "lobby"
+      },
+      {
+        "src": "/images/DSC_0242.JPG",
+        "category": "lobby"
+      },
+      {
+        "src": "/images/DSC_0236.JPG",
+        "category": "lobby"
+      },
+      {
+        "src": "/images/DSC_0269.JPG",
+        "category": "room"
+      },
+      {
+        "src": "/images/IMG_3465.JPG",
+        "category": "room"
+      },
+      {
+        "src": "/images/IMG_3471.JPG",
+        "category": "room"
+      },
+      {
+        "src": "/images/DSC_0267.JPG",
+        "category": "room"
+      },
+      {
+        "src": "/images/DSC_0233.JPG",
+        "category": "restaurant"
+      },
+      {
+        "src": "/images/IMG_3424.JPG",
+        "category": "restaurant"
+      },
+      {
+        "src": "/images/IMG_3417.JPG",
+        "category": "restaurant"
+      },
+      {
+        "src": "/images/DSC_0260.JPG",
+        "category": "room"
+      }
+    ],
+    "stats": [
+      {
+        "value": "50+",
+        "label": "Luxury Rooms"
+      },
+      {
+        "value": "100+",
+        "label": "Happy Guests"
+      },
+      {
+        "value": "24/7",
+        "label": "Support"
+      },
+      {
+        "value": "5⭐",
+        "label": "Ratings"
+      }
+    ],
+    "cta": {
+      "title": "Ready to Book Your Stay?",
+      "label": "Book Your Room Now",
+      "href": "/book-now"
+    }
+  },
+  "bookingPage": {
+    "hero": {
+      "kicker": "Luxury Booking Experience",
+      "title": "Book Your Stay at Lotus Inn",
+      "subtitle": "Reserve your room in a few simple steps and enjoy a modern, comfortable, and memorable stay in Mirpur."
+    },
+    "intro": {
+      "label": "Seamless Reservation",
+      "title": "A professional booking page designed for convenience",
+      "text": "Choose your preferred dates, select the room that suits your needs, and send your reservation request through a clean and modern interface built to match the rest of your website."
+    },
+    "highlights": [
+      {
+        "icon": "fa-solid fa-bed",
+        "title": "Premium Rooms",
+        "text": "Beautifully furnished rooms with comfort-focused interiors and modern amenities."
+      },
+      {
+        "icon": "fa-solid fa-shield-heart",
+        "title": "Safe & Reliable",
+        "text": "A secure reservation experience that builds trust and confidence for every guest."
+      },
+      {
+        "icon": "fa-solid fa-clock",
+        "title": "Fast Response",
+        "text": "Your booking requests are handled quickly so guests get prompt confirmation and support."
+      }
+    ],
+    "form": {
+      "title": "Reservation Form",
+      "subtitle": "Fill in your details and send your booking request.",
+      "guestOptions": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5+"
+      ],
+      "roomTypes": [
+        "Deluxe Room",
+        "Executive Room",
+        "Family Room",
+        "Standard Room"
+      ],
+      "buttonLabel": "Send on WhatsApp"
+    },
+    "pricing": {
+      "label": "Room Selection",
+      "title": "Choose the room that fits your stay"
+    },
+    "pricingCards": [
+      {
+        "title": "Deluxe Room",
+        "text": "Ideal for couples and short luxury stays.",
+        "price": "PKR 7,000 / night"
+      },
+      {
+        "title": "Executive Room",
+        "text": "Elegant setup with extra comfort and style.",
+        "price": "PKR 8,500 / night"
+      },
+      {
+        "title": "Family Room",
+        "text": "Spacious option for family trips and group stays.",
+        "price": "PKR 9,500 / night"
+      },
+      {
+        "title": "Standard Room",
+        "text": "Affordable, comfortable, and practical.",
+        "price": "PKR 5,500 / night"
+      }
+    ],
+    "whyChoose": {
+      "label": "Why Book With Us",
+      "title": "Everything guests expect from a modern stay",
+      "items": [
+        {
+          "icon": "fa-solid fa-wifi",
+          "label": "Free Wi-Fi"
+        },
+        {
+          "icon": "fa-solid fa-car",
+          "label": "Parking"
+        },
+        {
+          "icon": "fa-solid fa-bell-concierge",
+          "label": "Room Service"
+        },
+        {
+          "icon": "fa-solid fa-snowflake",
+          "label": "Air Conditioning"
+        },
+        {
+          "icon": "fa-solid fa-mug-hot",
+          "label": "Breakfast"
+        },
+        {
+          "icon": "fa-solid fa-headset",
+          "label": "24/7 Support"
+        }
+      ]
+    },
+    "contactCard": {
+      "title": "Need help before booking?",
+      "text": "Our team is available to assist with room selection, custom requests, family bookings, and arrival guidance.",
+      "items": [
+        {
+          "icon": "fa-solid fa-phone-volume",
+          "value": "+92 346 3260347"
+        },
+        {
+          "icon": "fa-solid fa-envelope",
+          "value": "info@lotusinnguesthouse.com"
+        },
+        {
+          "icon": "fa-solid fa-location-dot",
+          "value": "Kotli Rd, New Mirpur City, AJK"
+        }
+      ]
+    }
+  },
+  "contactPage": {
+    "hero": {
+      "kicker": "Get In Touch",
+      "title": "Contact Lotus Inn Guest House",
+      "subtitle": "We are here to help with bookings, room details, directions, and any special requests for your stay in Mirpur."
+    },
+    "intro": {
+      "label": "Contact & Support",
+      "title": "Let’s Plan Your Comfortable Stay",
+      "text": "Whether you want to reserve a room, ask about facilities, or get help before arrival, our team is ready to assist you quickly and professionally."
+    },
+    "cards": [
+      {
+        "icon": "fa-solid fa-location-dot",
+        "title": "Visit Us",
+        "text": "Kotli Rd, New Mirpur City, Azad Jammu And Kashmir, 10250"
+      },
+      {
+        "icon": "fa-solid fa-phone-volume",
+        "title": "Call Anytime",
+        "text": "+92 346 3260347"
+      },
+      {
+        "icon": "fa-solid fa-envelope-open-text",
+        "title": "Email Support",
+        "text": "info@lotusinnguesthouse.com"
+      }
+    ],
+    "form": {
+      "title": "Send Us a Message",
+      "subtitle": "Fill out the form below and send your query by email or WhatsApp.",
+      "subjects": [
+        "General Inquiry",
+        "Room Booking",
+        "Pricing Details",
+        "Event / Group Stay",
+        "Location & Directions"
+      ]
+    },
+    "detailsPanel": {
+      "label": "Why Reach Out",
+      "title": "Fast, Friendly, and Helpful Support",
+      "items": [
+        {
+          "icon": "fa-solid fa-bolt",
+          "title": "Quick Response",
+          "text": "Get fast assistance for bookings and room-related questions."
+        },
+        {
+          "icon": "fa-solid fa-hotel",
+          "title": "Stay Guidance",
+          "text": "We help you choose the right room and stay options with ease."
+        },
+        {
+          "icon": "fa-solid fa-headset",
+          "title": "Guest Support",
+          "text": "Our team is available to support your pre-arrival and stay needs."
+        }
+      ]
+    },
+    "businessHours": {
+      "label": "Business Hours",
+      "title": "We’re Available Every Day",
+      "rows": [
+        {
+          "day": "Monday - Friday",
+          "time": "24/7 Available"
+        },
+        {
+          "day": "Saturday",
+          "time": "Available"
+        },
+        {
+          "day": "Sunday",
+          "time": "Available"
+        },
+        {
+          "day": "Bookings & WhatsApp",
+          "time": "Available Daily"
+        }
+      ]
+    },
+    "mapCard": {
+      "label": "Location",
+      "title": "Easy to Reach in Mirpur",
+      "text": "Located in a prime area with convenient access to key city spots, transport, and nearby services.",
+      "mapUrl": "https://maps.google.com/?q=Kotli+Road+New+Mirpur+City"
+    },
+    "cta": {
+      "title": "Need Help With a Booking?",
+      "text": "Connect with our team instantly for room availability, pricing, and special stay requests.",
+      "primaryLabel": "Book Now",
+      "primaryHref": "/book-now",
+      "secondaryLabel": "Chat on WhatsApp"
+    }
+  }
+}
