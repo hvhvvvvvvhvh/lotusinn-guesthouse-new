@@ -43,22 +43,23 @@ export default function BlogIndex({ blogs, authors }) {
           </div>
         </section>
 
-        {/* <section className="lotus-blog-featured">
+        <section className="lotus-blog-featured">
           {featured ? (
             <>
               <article className="lotus-featured-card">
-                <Link href={`/blog/${featured.slug}`} className="lotus-featured-image">
-                  {featured.featuredImage ? <img src={featured.featuredImage} alt={featured.title} /> : <div className="lotus-post-image-fallback">Lotus Inn</div>}
-                </Link>
-                <div className="lotus-featured-body">
+                                <div className="lotus-featured-body">
                   <div className="lotus-post-meta"><span>{featured.category || 'Travel Guide'}</span><b>•</b><span>{featured.publishDate || ''}</span></div>
                   <h2><Link href={`/blog/${featured.slug}`}>{featured.title}</Link></h2>
                   {featured.excerpt && <p>{featured.excerpt}</p>}
                   <div className="lotus-featured-bottom"><span>By {featuredAuthor?.name || 'Lotus Inn Team'}</span><Link href={`/blog/${featured.slug}`}>Read Article <span>→</span></Link></div>
                 </div>
+                <Link href={`/blog/${featured.slug}`} className="lotus-featured-image">
+                  {featured.featuredImage ? <img src={featured.featuredImage} alt={featured.title} /> : <div className="lotus-post-image-fallback">Lotus Inn</div>}
+                </Link>
+
               </article>
 
-              <aside className="lotus-latest-sidebar">
+              {/* <aside className="lotus-latest-sidebar">
                 <div className="lotus-sidebar-card">
                   <span className="lotus-eyebrow">LATEST ARTICLES</span>
                   <div className="lotus-sidebar-list">
@@ -76,12 +77,12 @@ export default function BlogIndex({ blogs, authors }) {
                   <p>Explore our rooms and make your reservation directly with Lotus Inn Guest House.</p>
                   <Link href="/book-now">Book Your Stay</Link>
                 </div>
-              </aside>
+              </aside> */}
             </>
           ) : (
             <div className="lotus-empty-blog"><strong>No published articles yet.</strong><p>Our latest travel guides and local insights will appear here soon.</p></div>
           )}
-        </section> */}
+        </section>
 
         {cards.length > 0 && (
           <section className="lotus-blog-listing">

@@ -1226,7 +1226,7 @@ h1,h2,h3,h4,h5,h6 {font-weight: 600;}
    LOTUS INN PUBLIC BLOG — FINAL PUBLISH-READY DESIGN
    ========================================================= */
 .lotus-blog-page,.lotus-article-page{background:#f6f8f5;color:#18342a;min-height:70vh;font-family:Poppins,sans-serif}
-.lotus-blog-hero{padding:118px 22px 48px;background:linear-gradient(180deg,#edf5ef 0%,#f6f8f5 100%);border-bottom:1px solid #e0e9e2}
+.lotus-blog-hero{padding:118px 22px 48px;}
 .lotus-blog-hero-inner{max-width:1180px;margin:0 auto; text-align: center;}
 .lotus-eyebrow{display:inline-block;color:#087452;font-size:10px;line-height:1.4;font-weight:800;letter-spacing:2px;text-transform:uppercase}
 .lotus-blog-hero h1{margin:9px 0 8px;color:#000;font-size:43px;line-height:1.9;letter-spacing:-1px}
@@ -1344,23 +1344,23 @@ h1,h2,h3,h4,h5,h6 {font-weight: 600;}
   max-width:1180px;
   margin:0 auto;
   padding:42px 22px 28px;
-  display:grid;
+  /* display:grid;
   grid-template-columns:minmax(0,1fr) 292px;
   gap:26px;
-  align-items:start;
+  align-items:start; */
 }
-.lotus-featured-card { overflow:hidden; background:#fff; border:1px solid #dfe8e2; border-radius:16px; box-shadow:0 12px 30px rgba(24,52,42,.065); }
+.lotus-featured-card { overflow:hidden;display:flex; background:#fff;}
 .lotus-featured-image { display:block; height:390px; background:#e8f2ec; overflow:hidden; }
-.lotus-featured-image img { width:100%; height:100%; display:block; object-fit:cover; transition:transform .35s ease; }
+.lotus-featured-image img { transition:transform .35s ease;max-width: 100%;height: auto;width: 1200px; }
 .lotus-featured-card:hover .lotus-featured-image img { transform:scale(1.02); }
 .lotus-featured-body { padding:23px 25px 24px; }
-.lotus-featured-body h2 { margin:8px 0 9px; font-size:27px; line-height:1.25; letter-spacing:-.35px; }
-.lotus-featured-body h2 a { color:#153a2d; text-decoration:none; }
+.lotus-featured-body h2 { margin:8px 0 9px; font-size:38px; line-height:1.25; letter-spacing:-.35px; }
+.lotus-featured-body h2 a { color:#000; text-decoration:none; }
 .lotus-featured-body h2 a:hover { color:#087452; }
-.lotus-featured-body p { margin:0; color:#667970; font-size:13px; line-height:1.8; }
+.lotus-featured-body p { margin:0;color: #777;font-size: 16px; line-height:1.8; }
 .lotus-featured-bottom { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-top:17px; padding-top:14px; border-top:1px solid #edf1ee; }
-.lotus-featured-bottom span:first-child { color:#7a8781; font-size:10px; }
-.lotus-featured-bottom a { color:#087452; font-size:10px; font-weight:800; text-decoration:none; }
+.lotus-featured-bottom span:first-child {color: #087452;font-size: 14px;font-weight: 800; }
+.lotus-featured-bottom a { color:#087452; font-size:14px; font-weight:800; text-decoration:none; }
 .lotus-featured-bottom a span { font-size:12px; color:inherit; }
 .lotus-latest-sidebar { min-width:0; }
 .lotus-blog-listing { padding-top:28px; }
