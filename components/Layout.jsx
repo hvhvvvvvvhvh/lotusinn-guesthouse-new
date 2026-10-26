@@ -6,8 +6,8 @@ export default function Layout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    fetch('/data/siteData.json')
-      .then((res) => res.json())
+    fetch('/api/site-data?dataset=site')
+      .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
       .then(setSiteData)
       .catch((err) => console.error('Failed to load site data:', err));
   }, []);

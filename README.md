@@ -25,13 +25,13 @@ npm start
 
 Guest forms save locally before opening WhatsApp or an email composer. Guests must send the prepared message in that app. A saved request is pending, rather than a confirmed reservation.
 
-## Storage
+## Supabase storage
 
-Private records are JSON files in `data/`. Public room and site content are in `public/data/`. JSON updates are atomic and serialized within one Node process. Back up these directories and run a single application process on a persistent, writable disk. Multiple processes/replicas and serverless deployments need a shared database; filesystem storage is not a persistent Vercel backend.
+The server supports `LOTUS_STORAGE_DRIVER=supabase` for persistent hosting. Follow [SUPABASE-SETUP.md](SUPABASE-SETUP.md) to create the database schema, import existing content without overwriting database records, configure server secrets, and check the connection. All seven datasets use private, versioned Postgres JSONB documents. Database transactions reject stale versions and retry record updates across application instances.
 
-`LOTUS_DATA_DIR` and `LOTUS_PUBLIC_DATA_DIR` optionally relocate server-side storage. If relocating public JSON, configure the web server to serve that directory at `/data/`, because public pages also fetch these files.
+Public content is served through `/api/site-data`, with only the `site` and `rooms` datasets available. Guest records and unpublished blog content stay behind the existing server authorization checks. The Supabase secret key stays on the server; there is no direct browser database access.
 
-Supabase is currently used only by the optional migration script. Setting Supabase variables does not switch the running app to database storage. To migrate after provisioning the expected tables, configure `.env.local` and run `npm run migrate:blogs`.
+For offline development, `LOTUS_STORAGE_DRIVER=json` retains the original JSON files in `data/` and `public/data/`. JSON mode needs a persistent writable disk and one Node process. `LOTUS_DATA_DIR` and `LOTUS_PUBLIC_DATA_DIR` relocate those files. JSON files remain backups/import sources after enabling Supabase. The older `migrate:blogs` utility is retained for legacy tables; use `supabase:migrate` for the running application.
 
 ## Checks
 

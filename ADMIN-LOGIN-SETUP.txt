@@ -16,4 +16,6 @@ Production sign-in is disabled until both variables are configured.
 Admin sessions use signed, expiring tokens in an HttpOnly cookie. Middleware,
 server-rendered admin pages and admin API handlers each check authentication.
 
-For this project, blog/author data is stored in JSON files under /data. This works on a writable Node/self-hosted server. Serverless hosts such as Vercel do not provide persistent writable application storage, so publishing from the dashboard should use a database or persistent storage before relying on it in production.
+For persistent hosting, configure LOTUS_STORAGE_DRIVER=supabase and follow
+SUPABASE-SETUP.md to install the schema, import content and set server secrets.
+The json storage mode is retained for single-process local development.

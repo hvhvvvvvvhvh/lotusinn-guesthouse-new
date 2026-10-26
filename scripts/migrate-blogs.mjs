@@ -5,12 +5,12 @@ import { createClient } from '@supabase/supabase-js';
 
 const root = process.cwd();
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SECRET_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   throw new Error(
-    'Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY in .env.local'
+    'Missing SUPABASE_URL or SUPABASE_SECRET_KEY in .env.local'
   );
 }
 

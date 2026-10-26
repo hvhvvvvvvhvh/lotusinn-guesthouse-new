@@ -9,8 +9,7 @@ export async function getServerSideProps(context) {
   if (denied) return denied;
 
 
-  const roomsData = await readJson(filePaths.rooms);
-  const bookingsData = await readJson(filePaths.bookings).catch(() => ({ bookings: [] }));
+  const [roomsData, bookingsData] = await Promise.all([readJson(filePaths.rooms), readJson(filePaths.bookings)]);
   return {
     props: {
       initialRoomsData: roomsData,

@@ -20,18 +20,19 @@
 ## Verification
 
 - Production build: passed with Next.js 15.5.28.
-- Regression tests: all 8 passed. `npm test` covers sessions, direct server authorization, concurrent writes, validation, availability, pricing and public-content projection.
-- Integration tests: all 98 checks passed. `npm run test:integration` starts an isolated production server and checks page responses, authentication, public submissions, concurrent guest/admin writes, persisted booking edits/deletion, expenses, room uploads, CMS publishing and media visibility.
+- Regression tests: all 12 passed. `npm test` covers sessions, direct server authorization, concurrent writes, validation, availability, pricing, public-content projection and the Supabase adapter.
+- Integration tests: all 103 checks passed. `npm run test:integration` starts an isolated production server and checks page responses, authentication, public submissions, concurrent guest/admin writes, persisted booking edits/deletion, expenses, room uploads, CMS publishing, media visibility and public data access.
 - Dependency audit: `npm audit` reports zero vulnerabilities in the checked dependency tree.
 - Browser checks: admin login/dashboard/page search, gallery open/Escape, canonical room selection/pricing and homepage-to-booking navigation.
 - Integration tests use disposable copies of private and public data. Browser testing did not submit guest requests or send external WhatsApp/email messages.
+- Supabase follow-up: imported all seven datasets into the selected real project, verified server-only table/function access and rejection of stale writes, and passed read-only HTTP checks against the database-backed application. The server key is kept in the ignored environment file.
 
 ## Deployment requirements and limits
 
-Set `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` before production use. The application still needs a persistent writable disk and a single Node process. It does not yet use Supabase for live storage; the migration utility is optional and separate. A serverless/multi-instance deployment needs a database implementation.
+Set `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` before production use. Supabase support has since been added for all seven datasets, including database version checks and a non-overwriting importer. Follow `SUPABASE-SETUP.md` and run `supabase:check` against the selected project before enabling it on the host. The original JSON mode still requires a persistent writable disk and a single Node process.
 
 WhatsApp/email buttons save a request and open a composer. They do not send messages automatically or confirm room inventory. External delivery, a real Supabase migration, hosting and every responsive viewport were not tested.
 
-Existing uploaded room images and admin editor records are still stored in JSON and may be large. A dedicated upload/object-storage service would further reduce editor and room-data payloads.
+Existing uploaded images remain embedded in the selected JSON/JSONB storage and may be large. A dedicated upload/object-storage service would further reduce editor and room-data payloads.
 
 Run the checks and startup commands in `README.md` to reproduce the results.

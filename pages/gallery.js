@@ -13,8 +13,8 @@ export default function Gallery() {
   }, [popup]);
 
   useEffect(() => {
-    fetch('/data/siteData.json')
-      .then((res) => res.json())
+    fetch('/api/site-data?dataset=site')
+      .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
       .then(setData)
       .catch((err) => console.error('Failed to load gallery data:', err));
   }, []);

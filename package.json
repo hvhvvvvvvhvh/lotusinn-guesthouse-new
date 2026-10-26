@@ -8,7 +8,9 @@
     "start": "next start",
     "test": "node --test tests/*.test.mjs",
     "test:integration": "node scripts/check-project.mjs",
-    "migrate:blogs": "node --env-file=.env.local scripts/migrate-blogs.mjs"
+    "migrate:blogs": "node --env-file=.env.local scripts/migrate-blogs.mjs",
+    "supabase:migrate": "node --env-file=.env.local scripts/migrate-supabase.mjs",
+    "supabase:check": "node --env-file=.env.local scripts/check-supabase.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

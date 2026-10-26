@@ -16,8 +16,8 @@ export default function Contact() {
   const [status, setStatus] = useState({ type: '', message: '' });
 
   useEffect(() => {
-    fetch('/data/siteData.json')
-      .then((res) => res.json())
+    fetch('/api/site-data?dataset=site')
+      .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
       .then((json) => {
         const pageData = json.contactPage;
         setData(pageData);

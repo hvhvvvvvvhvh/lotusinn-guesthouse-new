@@ -25,8 +25,8 @@ export default function AmenitiesPage() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch('/data/roomsData.json')
-      .then((res) => res.json())
+    fetch('/api/site-data?dataset=rooms')
+      .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
       .then((json) => setData(json.amenitiesPage))
       .catch((err) => console.error('Failed to load amenities data:', err));
   }, []);

@@ -18,8 +18,8 @@ export default function Rooms() {
   const [searchClicked, setSearchClicked] = useState(false);
 
   useEffect(() => {
-    fetch('/data/roomsData.json')
-      .then((res) => res.json())
+    fetch('/api/site-data?dataset=rooms')
+      .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
       .then(json => {
         const bySlug = Object.fromEntries((json.roomsPage.availableRooms || []).map(room => [room.slug, room]));
         setData({ ...json, roomsPage: { ...json.roomsPage, masterRooms: (json.roomsPage.masterRooms || []).filter(room => bySlug[room.slug]).map(room => ({ ...room, ...bySlug[room.slug] })) } });

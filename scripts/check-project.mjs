@@ -20,7 +20,7 @@ const port = socket.address().port;
 await new Promise(resolve => socket.close(resolve));
 const password = crypto.randomUUID();
 const server = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '--hostname', '127.0.0.1', '--port', String(port)], {
-  env: { ...process.env, NODE_ENV: 'production', ADMIN_PASSWORD: password, ADMIN_SESSION_SECRET: crypto.randomUUID(), LOTUS_DATA_DIR: directory, LOTUS_PUBLIC_DATA_DIR: publicDirectory },
+  env: { ...process.env, NODE_ENV: 'production', LOTUS_STORAGE_DRIVER: 'json', ADMIN_PASSWORD: password, ADMIN_SESSION_SECRET: crypto.randomUUID(), LOTUS_DATA_DIR: directory, LOTUS_PUBLIC_DATA_DIR: publicDirectory },
   stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
 });
 let logs = '';
@@ -49,6 +49,10 @@ try {
   await request('/api/admin/bookings', { status: 401, headers: { 'x-middleware-subrequest': 'middleware:middleware:middleware:middleware:middleware' } });
   await request('/api/bookings', { status: 405 });
   await request('/api/messages', { status: 405 });
+  await request('/api/site-data?dataset=site');
+  await request('/api/site-data?dataset=rooms');
+  await request('/api/site-data?dataset=bookings', { status: 400 });
+  await request('/api/site-data?dataset=rooms', { method: 'POST', body: {}, status: 405 });
   await request('/api/admin/login', { method: 'POST', body: { password: 'incorrect' }, status: 401 });
   const login = await request('/api/admin/login', { method: 'POST', body: { password } });
   const setCookie = login.headers.get('set-cookie');
@@ -99,6 +103,7 @@ try {
   assert.equal(savedRooms.roomsPage.availableRooms[0].price, 'Rs 7,500 / night');
   assert.match(await (await request('/book-now')).text(), /7,500/);
   assert.match(await (await request('/room/deluxe')).text(), /7,500/);
+  assert.match(await (await request('/api/site-data?dataset=rooms')).text(), /7,500/);
   assert.match(await (await request('/')).text(), /7,500/);
   savedRooms.roomsPage.availableRooms[0].image = beforeImage;
   await request('/api/admin/rooms', { method: 'POST', admin: true, body: savedRooms });

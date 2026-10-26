@@ -8,10 +8,9 @@ export async function getServerSideProps(context) {
   if (denied) return denied;
 
 
-  const roomsData = await readJson(filePaths.rooms);
-  const bookingsData = await readJson(filePaths.bookings);
-  const messagesData = await readJson(filePaths.messages);
-  const blogsData = await readJson(filePaths.blogs);
+  const [roomsData, bookingsData, messagesData, blogsData] = await Promise.all([
+    readJson(filePaths.rooms), readJson(filePaths.bookings), readJson(filePaths.messages), readJson(filePaths.blogs),
+  ]);
   const rooms = roomsData?.roomsPage?.availableRooms || [];
   const bookings = bookingsData.bookings || [];
   const messages = messagesData.messages || [];
