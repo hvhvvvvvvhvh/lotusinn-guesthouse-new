@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { getBlogs, getAuthors } from '../../lib/blogStore';
+import { publicBlog, publicAuthor } from '../../lib/publicContent.js';
 
 export async function getServerSideProps() {
   const [blogs, authors] = await Promise.all([getBlogs(), getAuthors()]);
@@ -17,7 +18,7 @@ export async function getServerSideProps() {
     return true;
   });
 
-  return { props: { blogs: unique, authors } };
+  return { props: { blogs: unique.map(blog => publicBlog(blog)), authors: authors.map(publicAuthor) } };
 }
 
 export default function BlogIndex({ blogs, authors }) {

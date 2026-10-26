@@ -1,8 +1,13 @@
+import { requireAdminPage } from '../../lib/adminAuth.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { filePaths, readJson } from '../../lib/dataStore';
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const denied = await requireAdminPage(context);
+  if (denied) return denied;
+
+
   const roomsData = await readJson(filePaths.rooms);
   return { props: { initialData: roomsData } };
 }
@@ -50,7 +55,7 @@ export default function RoomsAdmin({ initialData }) {
     roomNumber: form.roomNumber || 'New'
   }), [form]);
 
-  const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => { const { name, value } = e.target; setForm((prev) => ({ ...prev, [name]: value })); };
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
@@ -117,14 +122,26 @@ export default function RoomsAdmin({ initialData }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const slug = (form.slug.trim() || form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')).replace(/(^-|-$)/g, '');
+      const slug = (form.slug.trim() || form.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       if (!form.title || !form.price) {
         setStatus({ type:'error', message:'Room title and price are required.' });
         return;
       }
 
-      const card = buildCard(form, slug);
-      const detail = buildDetail(form);
+      if (!slug || availableRooms.some(room => room.slug === slug && room.slug !== editingSlug)) {
+        setStatus({ type:'error', message:'Please choose a unique, valid room slug.' });
+        return;
+      }
+      const previousCard = availableRooms.find(room => room.slug === editingSlug);
+      const previousDetail = roomsData.roomDetails?.[editingSlug];
+      const card = { ...previousCard, ...buildCard(form, slug), ...(previousCard ? { badges: previousCard.badges, iconOnly: previousCard.iconOnly } : {}) };
+      const detail = { ...previousDetail, ...buildDetail(form), ...(previousDetail ? {
+        images: [form.image || defaultImage, ...(previousDetail.images || []).slice(1)],
+        icons: previousDetail.icons || defaultIcons,
+        facilities: previousDetail.facilities || defaultFacilities,
+        amenities: previousDetail.amenities || defaultAmenities,
+        reviews: previousDetail.reviews || defaultReviews,
+      } : {}) };
       const filteredAvailable = availableRooms.filter((room) => room.slug !== editingSlug && room.slug !== slug);
       const filteredMaster = masterRooms.filter((room) => room.slug !== editingSlug && room.slug !== slug);
 

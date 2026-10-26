@@ -1,26 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { filePaths, readJson } from '../../lib/dataStore';
 
-const RoomDetail = () => {
-  const router = useRouter();
-  const { type } = router.query;
-  const [data, setData] = useState(null);
+export async function getServerSideProps({ params }) {
+  const data = await readJson(filePaths.rooms);
+  if (!Object.hasOwn(data.roomDetails || {}, params.type)) return { notFound: true };
+  const card = data.roomsPage.availableRooms.find(item => item.slug === params.type);
+  const detail = data.roomDetails[params.type];
+  return { props: { room: { ...detail, ...(card ? { price: card.price, availability: card.availability || 'Available' } : {}) }, type: params.type, bookingBenefits: data.bookingBenefits || [] } };
+}
 
-  useEffect(() => {
-    if (!router.isReady) return;
-    fetch('/data/roomsData.json')
-      .then((res) => res.json())
-      .then(setData)
-      .catch((err) => console.error('Failed to load room detail data:', err));
-  }, [router.isReady]);
-
-  const room = data?.roomDetails?.[type];
-  const bookingBenefits = data?.bookingBenefits || [];
-
-  if (!type) return <h2 style={{ padding: '140px 20px 40px' }}>Loading...</h2>;
-
-  if (!room) return <h2 style={{ padding: '140px 20px 40px' }}>Room Not Found</h2>;
+const RoomDetail = ({ room, type, bookingBenefits }) => {
 
   return (
     <div className="room-detail">

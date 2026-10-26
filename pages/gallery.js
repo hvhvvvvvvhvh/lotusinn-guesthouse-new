@@ -5,6 +5,12 @@ export default function Gallery() {
   const [data, setData] = useState(null);
   const [filter, setFilter] = useState('all');
   const [popup, setPopup] = useState(null);
+  useEffect(() => {
+    if (!popup) return;
+    const close = event => { if (event.key === 'Escape') setPopup(null); };
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
+  }, [popup]);
 
   useEffect(() => {
     fetch('/data/siteData.json')
@@ -40,8 +46,8 @@ export default function Gallery() {
 
       <div className="gallery-grid">
         {filteredImages.map((img, index) => (
-          <div className="gallery-item" key={index}>
-            <img src={img.src} alt="Gallery" onClick={() => setPopup(img.src)} />
+          <div className="gallery-item" key={index} role="button" tabIndex={0} aria-label={`Open gallery image ${index + 1}`} onClick={() => setPopup(img.src)} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setPopup(img.src); } }}>
+            <img src={img.src} alt="Gallery" />
             <div className="hover">
               <i className="fa-solid fa-magnifying-glass"></i>
             </div>

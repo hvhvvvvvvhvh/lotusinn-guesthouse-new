@@ -1,16 +1,18 @@
-import { filePaths, readJson, writeJson } from '../../../lib/dataStore';
+import { filePaths, readJson } from '../../../lib/dataStore.js';
+import { requireAdminApi } from '../../../lib/adminAuth.js';
+import { createMessage } from '../../../lib/guestRequests.js';
+import { apiError } from '../../../lib/validation.js';
 
 export default async function handler(req, res) {
+  if (!await requireAdminApi(req, res)) return;
+  try {
   if (req.method === 'GET') {
     const data = await readJson(filePaths.messages);
     return res.status(200).json(data);
   }
   if (req.method === 'POST') {
-    const data = await readJson(filePaths.messages);
-    const message = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
-    const nextData = { messages: [message, ...(data.messages || [])] };
-    await writeJson(filePaths.messages, nextData);
-    return res.status(200).json({ success: true, message });
+    return res.status(201).json({ success: true, message: await createMessage(req.body) });
   }
   return res.status(405).json({ message: 'Method not allowed' });
+  } catch (error) { return apiError(res, error, 'Unable to process message request.'); }
 }

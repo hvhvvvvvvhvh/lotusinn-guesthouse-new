@@ -879,7 +879,7 @@ h1,h2,h3,h4,h5,h6 {font-weight: 600;}
 .content-secondary-btn { background:#fff; color:#26445d; border:1px solid #d7e4ef; }
 .header-actions { display:flex; gap:10px; }
 .content-card { background:#fff; border:1px solid #e0ebf4; border-radius:17px; padding:20px; margin-bottom:20px; box-shadow:0 12px 32px rgba(22,66,105,.06); }
-.content-toolbar { display:flex; align-items:end; gap:18px; justify-content:space-between; margin-bottom:18px; }
+.content-toolbar { display:flex; align-items:flex-end; gap:18px; justify-content:space-between; margin-bottom:18px; }
 .content-toolbar.single { justify-content:flex-start; }
 .content-toolbar > div { display:grid; gap:7px; }
 .content-toolbar label,.form-field label { font-size:12px; font-weight:700; color:#243b52; }
@@ -1232,7 +1232,7 @@ h1,h2,h3,h4,h5,h6 {font-weight: 600;}
 .lotus-blog-hero h1{margin:9px 0 8px;color:#000;font-size:43px;line-height:1.9;letter-spacing:-1px}
 .lotus-blog-hero p{margin:0;color:#777;font-size:14px;line-height:1.8}
 .lotus-blog-listing{max-width:1180px;margin:0 auto;padding:42px 22px 84px}
-.lotus-listing-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:22px}
+.lotus-listing-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:22px}
 .lotus-listing-heading h2{margin:5px 0 0;color:#000;font-size:27px;line-height:1.2}
 .lotus-listing-heading>p{margin:0;color:#777;font-size:12px;line-height:1.6;text-align:right}
 .lotus-post-grid-three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
@@ -1384,6 +1384,16 @@ h1,h2,h3,h4,h5,h6 {font-weight: 600;}
 }
 
 /* Final article readability */
+.admin-sidebar { flex-shrink:0; overflow-y:auto; }
+.admin-main { min-width:0; }
+.admin-topbar > div:last-child { flex-wrap:wrap; }
+@media(min-width:901px) and (max-width:1200px) {
+  .admin-topbar { flex-direction:column; align-items:flex-start; }
+}
+@media(max-width:650px) {
+  .admin-search { min-width:0; width:100%; }
+  .lotus-featured-card { flex-direction:column; }
+}
 .lotus-article-featured-wrap { margin-top:2px; }
 .lotus-article-featured { aspect-ratio:16/8; max-height:none; object-fit:cover; }
 .lotus-article-content { font-size:17px; line-height:1.95; }

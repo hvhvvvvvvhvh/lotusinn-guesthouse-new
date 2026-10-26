@@ -1,14 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { filePaths, readJson } from '../lib/dataStore';
+import { getBlogs } from '../lib/blogStore';
+import { publicBlog } from '../lib/publicContent.js';
 
-export default function Home() {
-  const [data, setData] = useState(null);
+export async function getServerSideProps() {
+  const [site, rooms, blogs] = await Promise.all([readJson(filePaths.site), readJson(filePaths.rooms), getBlogs()]);
+  const seen = new Set();
+  const posts = blogs.filter(blog => blog.status === 'Published').sort((a,b) => String(b.publishDate).localeCompare(String(a.publishDate))).filter(blog => { if (seen.has(blog.slug)) return false; seen.add(blog.slug); return true; }).slice(0, 3);
+  return { props: { data: { home: { ...site.home,
+    rooms: { ...site.home.rooms, cards: rooms.roomsPage.availableRooms.slice(0, 3).map(room => ({ image: room.image, title: room.title, price: room.price, link: `/room/${room.slug}`, linkLabel: 'View Details' })) },
+    blog: { ...site.home.blog, posts: posts.map(blog => ({ title: blog.title, excerpt: blog.excerpt || '', image: publicBlog(blog).featuredImage || '/images/DSC_0271.JPG', link: `/blog/${blog.slug}`, linkLabel: 'Read More' })) },
+  } } } };
+}
 
-  useEffect(() => {
-    fetch('/data/siteData.json')
-      .then((res) => res.json())
-      .then(setData)
-      .catch((err) => console.error('Failed to load home data:', err));
-  }, []);
+export default function Home({ data }) {
+  const router = useRouter();
+  const [dates, setDates] = useState({ checkIn: '', checkOut: '', guests: '2' });
+  const updateDates = (name, event) => {
+    const value = event.target.value;
+    setDates(previous => ({ ...previous, [name]: value }));
+  };
 
   const home = data?.home;
 
@@ -19,14 +31,14 @@ export default function Home() {
           <h1 dangerouslySetInnerHTML={{ __html: home?.hero?.title || '' }} />
           <p>{home?.hero?.subtitle}</p>
 
-          <div className="booking-bar">
-            {(home?.hero?.bookingPlaceholders || []).map((placeholder, index) => (
-              <input key={index} placeholder={placeholder} />
-            ))}
-            <a href={home?.hero?.bookingButton?.href || '/book-now'}>
+          <form className="booking-bar" onSubmit={event => { event.preventDefault(); router.push({ pathname: '/book-now', query: dates }); }}>
+            <input aria-label="Check-in date" type="date" value={dates.checkIn} onChange={event => updateDates('checkIn', event)} />
+            <input aria-label="Check-out date" type="date" min={dates.checkIn || undefined} value={dates.checkOut} onChange={event => updateDates('checkOut', event)} />
+            <input aria-label="Number of guests" type="number" min="1" max="50" value={dates.guests} onChange={event => updateDates('guests', event)} />
+            <button type="submit">
               {home?.hero?.bookingButton?.label || 'Check Availability'}
-            </a>
-          </div>
+            </button>
+          </form>
         </div>
         <div className="bg_overlay"></div>
       </section>

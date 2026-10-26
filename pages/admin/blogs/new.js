@@ -1,3 +1,4 @@
+import { requireAdminPage } from '../../../lib/adminAuth.js';
 import { useState } from 'react';
 import Link from 'next/link';
 import AdminLayout from '../../../components/AdminLayout';
@@ -14,7 +15,11 @@ const newBlock = (type = 'paragraph') => ({
   type, text: '', title: '', items: [''], url: '', label: '', question: '', answer: '', alt: ''
 });
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const denied = await requireAdminPage(context);
+  if (denied) return denied;
+
+
   return { props: { authors: await getAuthors() } };
 }
 

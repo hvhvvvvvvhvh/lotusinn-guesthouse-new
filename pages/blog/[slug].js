@@ -1,6 +1,8 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { getBlogs, getAuthors } from '../../lib/blogStore';
+import { safeUrl } from '../../lib/contentValidation.js';
+import { publicBlog, publicAuthor } from '../../lib/publicContent.js';
 
 export async function getServerSideProps({ params }) {
   const [blogs, authors] = await Promise.all([getBlogs(), getAuthors()]);
@@ -12,9 +14,9 @@ export async function getServerSideProps({ params }) {
 
   return {
     props: {
-      blog,
-      author: authors.find((a) => a.id === blog.authorId) || null,
-      related: publishedBlogs.filter((b) => b.id !== blog.id).slice(0, 5),
+      blog: publicBlog(blog, true),
+      author: authors.find((a) => a.id === blog.authorId) ? publicAuthor(authors.find((a) => a.id === blog.authorId)) : null,
+      related: publishedBlogs.filter((b) => b.id !== blog.id && b.slug !== blog.slug).slice(0, 5).map(blog => publicBlog(blog)),
     },
   };
 }
@@ -56,7 +58,7 @@ export default function BlogDetail({ blog, author, related }) {
               <div className="lotus-article-author-row">
                 <div className="lotus-article-author">
                   {author?.image ? <img src={author.image} alt={author.name} /> : <div className="lotus-author-fallback">{String(author?.name || 'L').charAt(0).toUpperCase()}</div>}
-                  <div><strong>{author?.name || 'Lotus Inn Team'}</strong><span>{author?.role || 'Lotus Inn Guest House'}</span></div>
+                  <div><strong>{author ? <Link href={`/authors/${author.slug}`}>{author.name}</Link> : 'Lotus Inn Team'}</strong><span>{author?.role || 'Lotus Inn Guest House'}</span></div>
                 </div>
                 <Link className="lotus-back-blog" href="/blog">All Guides</Link>
               </div>
@@ -103,14 +105,15 @@ export default function BlogDetail({ blog, author, related }) {
 
 function Block({ block }) {
   if (!block) return null;
+  const url = safeUrl(block.url, block.type === 'image');
   if (block.type === 'heading2') return <h2>{block.text}</h2>;
   if (block.type === 'heading3') return <h3>{block.text}</h3>;
   if (block.type === 'bullet' || block.type === 'numbered') {
     const Tag = block.type === 'bullet' ? 'ul' : 'ol';
     return <Tag>{(block.items || []).filter(Boolean).map((item, i) => <li key={i}>{item}</li>)}</Tag>;
   }
-  if (block.type === 'link') return block.url ? <div className="lotus-inline-cta"><a href={block.url} target={block.url.startsWith('http') ? '_blank' : undefined} rel={block.url.startsWith('http') ? 'noreferrer' : undefined}>{block.label || block.url}</a></div> : null;
-  if (block.type === 'image') return block.url ? <figure className="lotus-content-image"><img src={block.url} alt={block.alt || ''} /><figcaption>{block.alt || ''}</figcaption></figure> : null;
+  if (block.type === 'link') return url ? <div className="lotus-inline-cta"><a href={url} target={url.startsWith('http') ? '_blank' : undefined} rel={url.startsWith('http') ? 'noreferrer' : undefined}>{block.label || url}</a></div> : null;
+  if (block.type === 'image') return url ? <figure className="lotus-content-image"><img src={url} alt={block.alt || ''} /><figcaption>{block.alt || ''}</figcaption></figure> : null;
   if (block.type === 'faq') return <details className="lotus-faq"><summary>{block.question || 'Frequently asked question'}</summary><div>{block.answer}</div></details>;
   return block.text ? <p>{block.text}</p> : null;
 }

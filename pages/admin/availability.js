@@ -1,8 +1,14 @@
+import { requireAdminPage } from '../../lib/adminAuth.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { filePaths, readJson } from '../../lib/dataStore';
+import { occupiesRoom } from '../../lib/booking.js';
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const denied = await requireAdminPage(context);
+  if (denied) return denied;
+
+
   const roomsData = await readJson(filePaths.rooms);
   const bookingsData = await readJson(filePaths.bookings).catch(() => ({ bookings: [] }));
   return {
@@ -17,10 +23,6 @@ function normalizeStatus(status) {
   return String(status || 'Available').trim();
 }
 
-function isActiveBooking(booking) {
-  return ['Pending', 'Confirmed', 'Checked In'].includes(booking.status || 'Pending');
-}
-
 export default function RoomAvailability({ initialRoomsData, initialBookings }) {
   const [roomsData, setRoomsData] = useState(initialRoomsData);
   const [status, setStatus] = useState({ type: '', message: '' });
@@ -32,12 +34,11 @@ export default function RoomAvailability({ initialRoomsData, initialBookings }) 
   const derivedRooms = useMemo(() => {
     return rooms.map((room) => {
       const relatedBooking = bookings.find((booking) => {
-        const bookingRoom = String(booking.roomType || booking.room || '').toLowerCase();
-        const roomTitle = String(room.title || '').toLowerCase();
-        return isActiveBooking(booking) && bookingRoom && roomTitle && bookingRoom.includes(roomTitle.split(' ')[0]);
+        return occupiesRoom(booking, room);
       });
 
-      const statusValue = relatedBooking ? 'Booked' : normalizeStatus(room.availability);
+      const manualStatus = normalizeStatus(room.availability);
+      const statusValue = relatedBooking && !['Maintenance', 'Hold'].includes(manualStatus) ? 'Booked' : manualStatus;
 
       return {
         ...room,

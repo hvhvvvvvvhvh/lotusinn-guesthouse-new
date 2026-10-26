@@ -1,8 +1,13 @@
+import { requireAdminPage } from '../../lib/adminAuth.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { filePaths, readJson } from '../../lib/dataStore';
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const denied = await requireAdminPage(context);
+  if (denied) return denied;
+
+
   const data = await readJson(filePaths.expenses);
 
   return {
@@ -30,6 +35,8 @@ export default function AdminExpenses({ items }) {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState('All');
+  const [notice, setNotice] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const categories = [
     'Kitchen',
@@ -74,6 +81,7 @@ export default function AdminExpenses({ items }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (saving) return;
 
     const payload = {
       ...form,
@@ -85,18 +93,21 @@ export default function AdminExpenses({ items }) {
       ? expenses.map((item) => (item.id === editingId ? payload : item))
       : [payload, ...expenses];
 
-    setExpenses(updatedExpenses);
-    resetForm();
-
+    setSaving(true);
+    setNotice('');
     try {
-      await fetch('/api/admin/expenses', {
+      const response = await fetch('/api/admin/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ expenses: updatedExpenses }),
       });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Failed to save expenses.');
+      setExpenses(updatedExpenses);
+      resetForm();
     } catch (error) {
-      console.error('Failed to save expenses:', error);
-    }
+      setNotice(error.message);
+    } finally { setSaving(false); }
   };
 
   const handleEdit = (item) => {
@@ -112,23 +123,29 @@ export default function AdminExpenses({ items }) {
   };
 
   const handleDelete = async (id) => {
+    if (saving) return;
     const updatedExpenses = expenses.filter((item) => item.id !== id);
-    setExpenses(updatedExpenses);
-
+    setSaving(true);
+    setNotice('');
     try {
-      await fetch('/api/admin/expenses', {
+      const response = await fetch('/api/admin/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ expenses: updatedExpenses }),
       });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Failed to delete expense.');
+      setExpenses(updatedExpenses);
+      if (editingId === id) resetForm();
     } catch (error) {
-      console.error('Failed to delete expense:', error);
-    }
+      setNotice(error.message);
+    } finally { setSaving(false); }
   };
 
   return (
     <AdminLayout title="Track daily guest house expenses, staff costs, kitchen, fuel and room operations.">
       <div className="expenses-page">
+        {notice && <div className="admin-alert error" role="alert">{notice}</div>}
         <div className="expense-stats-grid">
           <div className="expense-stat-card">
             <span>Total Expenses</span>
@@ -228,7 +245,7 @@ export default function AdminExpenses({ items }) {
               </label>
 
               <div className="expense-form-actions">
-                <button type="submit" className="admin-btn">
+                <button type="submit" className="admin-btn" disabled={saving}>
                   {editingId ? 'Save Changes' : 'Add Expense'}
                 </button>
 
@@ -278,7 +295,7 @@ export default function AdminExpenses({ items }) {
                       </button>
                       <button
                         type="button"
-                        className="admin-btn danger small"
+                        className="admin-btn danger small" disabled={saving}
                         onClick={() => handleDelete(item.id)}
                       >
                         Delete

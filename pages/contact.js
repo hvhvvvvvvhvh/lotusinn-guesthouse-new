@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const initialForm = {
   fullName: '',
@@ -10,6 +10,8 @@ const initialForm = {
 
 export default function Contact() {
   const [data, setData] = useState(null);
+  const sending = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState({ type: '', message: '' });
 
@@ -73,24 +75,30 @@ export default function Contact() {
 
   const saveMessage = async () => {
     try {
-      const res = await fetch('/api/admin/messages', {
+      const res = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
       });
-      if (!res.ok) throw new Error('Failed to save message');
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to save message');
       return true;
     } catch (error) {
       console.error(error);
-      setStatus({ type: 'error', message: 'Message could not be saved right now. Please try again.' });
+      setStatus({ type: 'error', message: error.message || 'Message could not be saved right now. Please try again.' });
       return false;
     }
   };
 
   const sendByEmail = async () => {
-    if (!validateForm()) return;
+    if (!document.querySelector('form').reportValidity() || !validateForm()) return;
+    if (sending.current) return;
+    sending.current = true;
+    setSubmitting(true);
     const saved = await saveMessage();
-    if (!saved) return;
+    sending.current = false;
+    setSubmitting(false);
+    if (!saved) { return; }
 
     const subject = encodeURIComponent(`${form.subject} - ${form.fullName}`);
     const body = encodeURIComponent(buildMessage());
@@ -99,13 +107,21 @@ export default function Contact() {
   };
 
   const sendByWhatsApp = async () => {
-    if (!validateForm()) return;
+    if (!document.querySelector('form').reportValidity() || !validateForm()) return;
+    if (sending.current) return;
+    sending.current = true;
+    setSubmitting(true);
+    const popup = window.open('about:blank', '_blank');
+    if (popup) popup.opener = null;
     const saved = await saveMessage();
-    if (!saved) return;
+    sending.current = false;
+    setSubmitting(false);
+    if (!saved) { popup?.close(); return; }
 
     const message = encodeURIComponent(buildMessage());
     const whatsappUrl = `https://wa.me/${contactValues.whatsappNumber}?text=${message}`;
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    if (popup) popup.location.replace(whatsappUrl);
+    else window.location.assign(whatsappUrl);
     setStatus({ type: 'success', message: 'Message saved and WhatsApp is opening with your message.' });
   };
 
@@ -156,23 +172,23 @@ export default function Contact() {
 
               <form className="contact-form-grid" onSubmit={handleSubmit}>
                 <div className="contact-field">
-                  <label>Full Name</label>
-                  <input type="text" name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter your full name" required />
+                  <label htmlFor="fullName">Full Name</label>
+                  <input type="text" id="fullName" name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter your full name" required />
                 </div>
 
                 <div className="contact-field">
-                  <label>Phone Number</label>
-                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="Enter your phone number" required />
+                  <label htmlFor="phone">Phone Number</label>
+                  <input type="tel" id="phone" name="phone" value={form.phone} onChange={handleChange} placeholder="Enter your phone number" required />
                 </div>
 
                 <div className="contact-field">
-                  <label>Email Address</label>
-                  <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Enter your email address" required />
+                  <label htmlFor="email">Email Address</label>
+                  <input type="email" id="email" name="email" value={form.email} onChange={handleChange} placeholder="Enter your email address" required />
                 </div>
 
                 <div className="contact-field">
-                  <label>Subject</label>
-                  <select name="subject" value={form.subject} onChange={handleChange}>
+                  <label htmlFor="subject">Subject</label>
+                  <select id="subject" name="subject" value={form.subject} onChange={handleChange}>
                     {(data?.form?.subjects || []).map((subject) => (
                       <option key={subject} value={subject}>{subject}</option>
                     ))}
@@ -181,7 +197,7 @@ export default function Contact() {
 
                 <div className="contact-field contact-field-full">
                   <label>Your Message</label>
-                  <textarea name="message" value={form.message} onChange={handleChange} rows="6" placeholder="Write your message here" required />
+                  <textarea id="message" name="message" value={form.message} onChange={handleChange} rows="6" placeholder="Write your message here" required />
                 </div>
 
                 {status.message ? (
@@ -191,12 +207,12 @@ export default function Contact() {
                 ) : null}
 
                 <div className="contact-action-row contact-field-full">
-                  <button className="contact-submit-btn" type="submit">
+                  <button className="contact-submit-btn" type="submit" disabled={submitting}>
                     <i className="fa-solid fa-envelope"></i>
                     <span>Send by Email</span>
                   </button>
 
-                  <button className="contact-submit-btn contact-submit-btn-secondary" type="button" onClick={sendByWhatsApp}>
+                  <button className="contact-submit-btn contact-submit-btn-secondary" type="button" onClick={sendByWhatsApp} disabled={submitting}>
                     <i className="fa-brands fa-whatsapp"></i>
                     <span>Send on WhatsApp</span>
                   </button>

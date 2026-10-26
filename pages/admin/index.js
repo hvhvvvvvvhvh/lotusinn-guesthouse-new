@@ -1,7 +1,13 @@
+import { requireAdminPage } from '../../lib/adminAuth.js';
 import AdminLayout from '../../components/AdminLayout';
 import { filePaths, readJson } from '../../lib/dataStore';
+import { bookingAmount, localToday } from '../../lib/booking.js';
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const denied = await requireAdminPage(context);
+  if (denied) return denied;
+
+
   const roomsData = await readJson(filePaths.rooms);
   const bookingsData = await readJson(filePaths.bookings);
   const messagesData = await readJson(filePaths.messages);
@@ -14,13 +20,20 @@ export async function getServerSideProps() {
   const activeBookings = bookings.length;
   const totalMessages = messages.length;
   const publishedBlogs = blogs.filter((item) => item.status === 'Published').length;
-  const monthlyIncome = bookings.reduce((sum, item) => sum + Number(String(item.roomPrice || '').replace(/[^\d.]/g, '') || 0), 0);
-  return { props: { totalRooms, activeBookings, totalMessages, monthlyIncome, publishedBlogs, bookings, messages } };
+  const monthlyIncome = bookings.filter(item => !['Cancelled', 'No Show'].includes(item.status)).reduce((sum, item) => sum + bookingAmount(item), 0);
+  const year = localToday().slice(0, 4);
+  const monthly = Array.from({ length: 12 }, (_, index) => {
+    const prefix = year + '-' + String(index + 1).padStart(2, '0');
+    const items = bookings.filter(item => String(item.checkIn || '').startsWith(prefix));
+    return { label: new Date(Date.UTC(Number(year), index, 1)).toLocaleString('en', { month: 'short', timeZone: 'UTC' }), count: items.length };
+  });
+  return { props: { monthly, year, totalRooms, activeBookings, totalMessages, monthlyIncome, publishedBlogs, bookings, messages } };
 }
 
-export default function AdminDashboard({ totalRooms, activeBookings, totalMessages, monthlyIncome, publishedBlogs, bookings, messages }) {
+export default function AdminDashboard({ monthly, year, totalRooms, activeBookings, totalMessages, monthlyIncome, publishedBlogs, bookings, messages }) {
   const recentBookings = bookings.slice(0, 5);
   const recentMessages = messages.slice(0, 5);
+  const maximum = Math.max(1, ...monthly.map(item => item.count));
   return (
     <AdminLayout title="Professional dashboard for Lotus Inn Guest House operations.">
       <section className="admin-cards">
@@ -33,18 +46,15 @@ export default function AdminDashboard({ totalRooms, activeBookings, totalMessag
       <section className="admin-grid">
         <div className="admin-panel">
           <h3>Booking Performance</h3>
-          <p>Monthly overview for the current Lotus Inn demo dashboard.</p>
+          <p>Booking arrivals by month in {year}.</p>
           <div className="admin-chart">
-            <svg viewBox="0 0 800 360" preserveAspectRatio="none">
-              <line x1="60" y1="300" x2="760" y2="300" stroke="#d6dfeb" strokeWidth="2"/>
-              <line x1="60" y1="240" x2="760" y2="240" stroke="#e8eef5" strokeWidth="1"/>
-              <line x1="60" y1="180" x2="760" y2="180" stroke="#e8eef5" strokeWidth="1"/>
-              <line x1="60" y1="120" x2="760" y2="120" stroke="#e8eef5" strokeWidth="1"/>
-              <polyline fill="none" stroke="#2f9ad1" strokeWidth="4" points="80,260 200,220 320,140 440,170 560,230 680,210 740,160" />
-              <polyline fill="none" stroke="#f1b214" strokeWidth="4" points="80,285 200,275 320,270 440,262 560,272 680,290 740,280" />
-              {[80,200,320,440,560,680,740].map((x,idx)=><circle key={idx} cx={x} cy={[260,220,140,170,230,210,160][idx]} r="6" fill="#4f475e"/>)}
-              {[80,200,320,440,560,680,740].map((x,idx)=><circle key={`b${idx}`} cx={x} cy={[285,275,270,262,272,290,280][idx]} r="6" fill="#4f475e"/>)}
-              <text x="80" y="335" fill="#73819a" fontSize="14">Jan</text><text x="200" y="335" fill="#73819a" fontSize="14">Feb</text><text x="320" y="335" fill="#73819a" fontSize="14">Mar</text><text x="440" y="335" fill="#73819a" fontSize="14">Apr</text><text x="560" y="335" fill="#73819a" fontSize="14">May</text><text x="680" y="335" fill="#73819a" fontSize="14">Jun</text><text x="740" y="335" fill="#73819a" fontSize="14">Jul</text>
+            <svg viewBox="0 0 800 360" role="img" aria-label={`Monthly booking arrivals in ${year}`}>
+              <line x1="30" y1="290" x2="780" y2="290" stroke="#d6dfeb" strokeWidth="2" />
+              {monthly.map((item,index) => {
+                const height = item.count / maximum * 210;
+                const x = 38 + index * 62;
+                return <g key={item.label}><title>{`${item.label}: ${item.count} bookings`}</title><rect x={x} y={290-height} width="36" height={height} rx="4" fill="#0b6b49" /><text x={x+18} y={275-height} textAnchor="middle" fill="#17362a" fontSize="14">{item.count}</text><text x={x+18} y="325" textAnchor="middle" fill="#62756b" fontSize="13">{item.label}</text></g>;
+              })}
             </svg>
           </div>
         </div>
@@ -59,7 +69,7 @@ export default function AdminDashboard({ totalRooms, activeBookings, totalMessag
             <h3 style={{marginTop:0}}>Quick Snapshot</h3>
             <p>Manage rooms, booking flow, and guest communication from one place.</p>
             <div style={{display:'grid',gap:'12px',marginTop:'18px'}}>
-              <div className="admin-room-item"><div className="admin-room-meta"><h4>Bookings Pending</h4><p>Review and confirm upcoming stays</p></div><strong>{activeBookings}</strong></div>
+              <div className="admin-room-item"><div className="admin-room-meta"><h4>Bookings Pending</h4><p>Review and confirm upcoming stays</p></div><strong>{bookings.filter(item => (item.status || 'Pending') === 'Pending').length}</strong></div>
               <div className="admin-room-item"><div className="admin-room-meta"><h4>Messages Pending</h4><p>Respond to guest questions fast</p></div><strong>{totalMessages}</strong></div>
             </div>
           </div>
@@ -71,7 +81,7 @@ export default function AdminDashboard({ totalRooms, activeBookings, totalMessag
           <div className="admin-header-row"><h3>Recent Bookings</h3><a className="admin-btn" href="/admin/bookings">View All</a></div>
           <table className="admin-table"><thead><tr><th>Guest</th><th>Room</th><th>Dates</th><th>Status</th></tr></thead><tbody>
           {recentBookings.length ? recentBookings.map((item) => (
-            <tr key={item.id}><td>{item.fullName}</td><td>{item.roomType}</td><td>{item.checkIn} → {item.checkOut}</td><td><span className="admin-tag pending">Pending</span></td></tr>
+            <tr key={item.id}><td>{item.fullName}</td><td>{item.roomType}</td><td>{item.checkIn} → {item.checkOut}</td><td><span className="admin-tag pending">{item.status || 'Pending'}</span></td></tr>
           )) : <tr><td colSpan="4">No bookings yet.</td></tr>}
           </tbody></table>
         </div>

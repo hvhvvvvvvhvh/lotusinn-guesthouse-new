@@ -1,5 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
+import { filePaths, readJson } from '../lib/dataStore';
+
+export async function getServerSideProps() {
+  const [site, rooms] = await Promise.all([readJson(filePaths.site), readJson(filePaths.rooms)]);
+  const listed = rooms.roomsPage.availableRooms;
+  return { props: { bookingData: { ...site.bookingPage, form: { ...site.bookingPage.form, roomTypes: listed.map(room => room.title) }, pricingCards: listed.map(room => ({ title: room.title, price: room.price, text: room.description || room.text || '', slug: room.slug })) } } };
+}
 
 const initialForm = {
   checkIn: '',
@@ -12,46 +19,45 @@ const initialForm = {
   notes: ''
 };
 
-export default function BookNow() {
+export default function BookNow({ bookingData }) {
   const router = useRouter();
-  const [data, setData] = useState(null);
-  const [form, setForm] = useState(initialForm);
+  const data = bookingData;
+  const sending = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState(() => ({ ...initialForm, roomType: bookingData.form.roomTypes[0] || '' }));
   const [status, setStatus] = useState({ type: '', message: '' });
   const [prefilledRoom, setPrefilledRoom] = useState(null);
 
   useEffect(() => {
-    fetch('/data/siteData.json')
-      .then((res) => res.json())
-      .then((json) => {
-        setData(json.bookingPage);
-        setForm((prev) => ({
-          ...prev,
-          roomType: prev.roomType || json.bookingPage?.form?.roomTypes?.[0] || 'Deluxe Room',
-          guests: json.bookingPage?.form?.guestOptions?.[1] || prev.guests
-        }));
-      })
-      .catch((err) => {
-        console.error('Failed to load booking page data:', err);
-        setStatus({ type: 'error', message: 'Booking details could not be loaded. Please refresh the page.' });
-      });
-  }, []);
+    if (!router.isReady) return;
+    const { checkIn, checkOut, guests } = router.query;
+    setForm(previous => ({ ...previous,
+      ...(typeof checkIn === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(checkIn) ? { checkIn } : {}),
+      ...(typeof checkOut === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(checkOut) ? { checkOut } : {}),
+      ...(typeof guests === 'string' && /^\d+$/.test(guests) && Number(guests) >= 1 && Number(guests) <= 50 ? { guests } : {}),
+    }));
+  }, [router.isReady, router.query.checkIn, router.query.checkOut, router.query.guests]);
 
   useEffect(() => {
     if (!router.isReady) return;
     const room = typeof router.query.room === 'string' ? router.query.room : '';
-    const price = typeof router.query.price === 'string' ? router.query.price : '';
     const slug = typeof router.query.slug === 'string' ? router.query.slug : '';
     const tag = typeof router.query.tag === 'string' ? router.query.tag : '';
 
     if (room) {
-      setPrefilledRoom({ title: room, price, slug, tag });
-      setForm((prev) => ({ ...prev, roomType: room }));
+      const listed = data.pricingCards.find(item => slug ? item.slug === slug : item.title === room);
+      if (!listed) {
+        setStatus({ type: 'error', message: 'That room is no longer listed. Please choose an available room.' });
+        return;
+      }
+      setPrefilledRoom({ ...listed, tag });
+      setForm((prev) => ({ ...prev, roomType: listed.title }));
       setStatus({
         type: 'success',
-        message: `${room}${price ? ` (${price})` : ''} has been selected for your booking.`
+        message: `${listed.title}${listed.price ? ` (${listed.price})` : ''} has been selected for your booking.`
       });
     }
-  }, [router.isReady, router.query.room, router.query.price, router.query.slug, router.query.tag]);
+  }, [router.isReady, router.query.room, router.query.price, router.query.slug, router.query.tag, data]);
 
   const selectedRoom = useMemo(() => {
     const match = (data?.pricingCards || []).find((item) => item.title === form.roomType);
@@ -123,38 +129,52 @@ export default function BookNow() {
   };
 
   const saveBooking = async () => {
-    const payload = { ...form, roomPrice: selectedRoom?.price || '' };
+    const payload = { ...form, roomSlug: selectedRoom?.slug || (prefilledRoom?.title === form.roomType ? prefilledRoom.slug : '') || '' };
     try {
-      const res = await fetch('/api/admin/bookings', {
+      const res = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error('Failed to save booking');
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to save booking');
       return true;
     } catch (error) {
       console.error(error);
-      setStatus({ type: 'error', message: 'Booking could not be saved right now. Please try again.' });
+      setStatus({ type: 'error', message: error.message || 'Booking could not be saved right now. Please try again.' });
       return false;
     }
   };
 
   const sendViaWhatsApp = async () => {
-    if (!validateForm()) return;
+    if (!document.querySelector('form').reportValidity() || !validateForm()) return;
+    if (sending.current) return;
+    sending.current = true;
+    setSubmitting(true);
+    const popup = window.open('about:blank', '_blank');
+    if (popup) popup.opener = null;
     const saved = await saveBooking();
-    if (!saved) return;
+    sending.current = false;
+    setSubmitting(false);
+    if (!saved) { popup?.close(); return; }
 
     const message = encodeURIComponent(buildBookingMessage());
     const whatsappUrl = `https://wa.me/${contactValues.whatsappNumber}?text=${message}`;
 
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    if (popup) popup.location.replace(whatsappUrl);
+    else window.location.assign(whatsappUrl);
     setStatus({ type: 'success', message: 'Booking saved and WhatsApp is opening with your booking details.' });
   };
 
   const sendViaEmail = async () => {
-    if (!validateForm()) return;
+    if (!document.querySelector('form').reportValidity() || !validateForm()) return;
+    if (sending.current) return;
+    sending.current = true;
+    setSubmitting(true);
     const saved = await saveBooking();
-    if (!saved) return;
+    sending.current = false;
+    setSubmitting(false);
+    if (!saved) { return; }
 
     const subject = encodeURIComponent(`Booking Request - ${form.fullName}`);
     const body = encodeURIComponent(buildBookingMessage());
@@ -209,27 +229,28 @@ export default function BookNow() {
 
               <form className="booking-form-grid" onSubmit={handleSubmit}>
                 <div className="booking-field">
-                  <label>Check In</label>
-                  <input type="date" name="checkIn" value={form.checkIn} onChange={handleChange} required />
+                  <label htmlFor="checkIn">Check In</label>
+                  <input type="date" id="checkIn" name="checkIn" value={form.checkIn} onChange={handleChange} required />
                 </div>
 
                 <div className="booking-field">
-                  <label>Check Out</label>
-                  <input type="date" name="checkOut" value={form.checkOut} onChange={handleChange} required />
+                  <label htmlFor="checkOut">Check Out</label>
+                  <input type="date" id="checkOut" name="checkOut" value={form.checkOut} onChange={handleChange} required />
                 </div>
 
                 <div className="booking-field">
-                  <label>Guests</label>
-                  <select name="guests" value={form.guests} onChange={handleChange}>
+                  <label htmlFor="guests">Guests</label>
+                  <select id="guests" name="guests" value={form.guests} onChange={handleChange}>
+                    {!(data?.form?.guestOptions || []).some(item => String(item).replace('+', '') === String(form.guests)) && <option value={form.guests}>{form.guests}</option>}
                     {(data?.form?.guestOptions || []).map((item) => (
-                      <option key={item} value={item}>{item}</option>
+                      <option key={item} value={String(item).replace('+', '')}>{item}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="booking-field">
-                  <label>Room Type</label>
-                  <select name="roomType" value={form.roomType} onChange={handleChange}>
+                  <label htmlFor="roomType">Room Type</label>
+                  <select id="roomType" name="roomType" value={form.roomType} onChange={handleChange}>
                     {prefilledRoom?.title && !(data?.form?.roomTypes || []).includes(prefilledRoom.title) ? (
                       <option value={prefilledRoom.title}>{prefilledRoom.title}</option>
                     ) : null}
@@ -240,23 +261,23 @@ export default function BookNow() {
                 </div>
 
                 <div className="booking-field booking-field-full">
-                  <label>Full Name</label>
-                  <input type="text" name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter your full name" required />
+                  <label htmlFor="fullName">Full Name</label>
+                  <input type="text" id="fullName" name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter your full name" required />
                 </div>
 
                 <div className="booking-field">
-                  <label>Phone Number</label>
-                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="03xx xxx xxxx" required />
+                  <label htmlFor="phone">Phone Number</label>
+                  <input type="tel" id="phone" name="phone" value={form.phone} onChange={handleChange} placeholder="03xx xxx xxxx" required />
                 </div>
 
                 <div className="booking-field">
-                  <label>Email Address</label>
-                  <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="you@example.com" required />
+                  <label htmlFor="email">Email Address</label>
+                  <input type="email" id="email" name="email" value={form.email} onChange={handleChange} placeholder="you@example.com" required />
                 </div>
 
                 <div className="booking-field booking-field-full">
-                  <label>Special Requests</label>
-                  <textarea name="notes" value={form.notes} onChange={handleChange} rows="4" placeholder="Airport pickup, early check-in, extra bed, etc."></textarea>
+                  <label htmlFor="notes">Special Requests</label>
+                  <textarea id="notes" name="notes" value={form.notes} onChange={handleChange} rows="4" placeholder="Airport pickup, early check-in, extra bed, etc."></textarea>
                 </div>
 
                 {status.message ? (
@@ -266,12 +287,12 @@ export default function BookNow() {
                 ) : null}
 
                 <div className="booking-action-row booking-field-full">
-                  <button className="booking-submit-btn" type="submit">
+                  <button className="booking-submit-btn" type="submit" disabled={submitting}>
                     <i className="fa-brands fa-whatsapp"></i>
                     <span>Send on WhatsApp</span>
                   </button>
 
-                  <button className="booking-submit-btn booking-submit-btn-secondary" type="button" onClick={sendViaEmail}>
+                  <button className="booking-submit-btn booking-submit-btn-secondary" type="button" onClick={sendViaEmail} disabled={submitting}>
                     <i className="fa-solid fa-envelope"></i>
                     <span>Send by Email</span>
                   </button>

@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { getAuthors, getBlogs } from '../../lib/blogStore';
+import { publicAuthor } from '../../lib/publicContent.js';
 
 export async function getServerSideProps({ params }) {
   const [authors, blogs] = await Promise.all([getAuthors(), getBlogs()]);
   const author = authors.find((item) => item.slug === params.slug);
   if (!author) return { notFound: true };
-  return { props: { author, blogs: blogs.filter((blog) => blog.authorId === author.id && blog.status === 'Published') } };
+  return { props: { author: publicAuthor(author), blogs: blogs.filter((blog) => blog.authorId === author.id && blog.status === 'Published').map(blog => ({ id: blog.id, title: blog.title, slug: blog.slug })) } };
 }
 
 export default function AuthorPage({ author, blogs }) {

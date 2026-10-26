@@ -1,8 +1,13 @@
+import { requireAdminPage } from '../../lib/adminAuth.js';
 import { useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { filePaths, readJson } from '../../lib/dataStore';
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const denied = await requireAdminPage(context);
+  if (denied) return denied;
+
+
   const roomsData = await readJson(filePaths.rooms);
   return { props: { initialData: roomsData } };
 }
@@ -20,6 +25,7 @@ export default function AmenitiesAdmin({ initialData }) {
   const [roomsData, setRoomsData] = useState(initialData);
   const [itemForm, setItemForm] = useState(emptyItem);
   const [editingKey, setEditingKey] = useState('');
+  const [editingSection, setEditingSection] = useState('');
   const [status, setStatus] = useState({ type:'', message:'' });
 
   const amenitiesPage = roomsData?.amenitiesPage || {};
@@ -33,13 +39,13 @@ export default function AmenitiesAdmin({ initialData }) {
     if (!res.ok) throw new Error('Save failed');
   };
 
-  const handleItemChange = (e) => setItemForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleItemChange = (e) => { const { name, value } = e.target; setItemForm((prev) => ({ ...prev, [name]: value })); };
 
   const updateHeaderField = (path, value) => {
     const nextData = structuredClone(roomsData);
     const keys = path.split('.');
     let ref = nextData;
-    for (let i = 0; i < keys.length - 1; i += 1) ref = ref[keys[i]];
+    for (let i = 0; i < keys.length - 1; i += 1) ref = ref[keys[i]] ||= {};
     ref[keys[keys.length - 1]] = value;
     setRoomsData(nextData);
   };
@@ -64,14 +70,19 @@ export default function AmenitiesAdmin({ initialData }) {
       const nextData = structuredClone(roomsData);
       const section = itemForm.section;
       const list = nextData.amenitiesPage?.[section] || [];
-      const nextList = editingKey
-        ? list.map((item, index) => (String(index) === editingKey ? { title:itemForm.title, text:itemForm.text, price:itemForm.price } : item))
-        : [{ title:itemForm.title, text:itemForm.text, price:itemForm.price }, ...list];
+      const edited = editingKey !== '' ? nextData.amenitiesPage[editingSection]?.[Number(editingKey)] : null;
+      const entry = { ...edited, title:itemForm.title, text:itemForm.text, price:itemForm.price };
+      const sameSection = editingKey !== '' && editingSection === section;
+      const nextList = sameSection
+        ? list.map((item, index) => (String(index) === editingKey ? entry : item))
+        : [entry, ...list];
+      if (editingKey !== '' && !sameSection) nextData.amenitiesPage[editingSection] = nextData.amenitiesPage[editingSection].filter((_, index) => String(index) !== editingKey);
       nextData.amenitiesPage[section] = nextList;
       await saveAll(nextData);
       setRoomsData(nextData);
       setItemForm(emptyItem);
       setEditingKey('');
+      setEditingSection('');
       setStatus({ type:'success', message: editingKey ? 'Amenity updated successfully.' : 'Amenity added successfully.' });
     } catch (error) {
       console.error(error);
@@ -84,6 +95,7 @@ export default function AmenitiesAdmin({ initialData }) {
     if (!item) return;
     setItemForm({ section, title:item.title || '', text:item.text || '', price:item.price || '' });
     setEditingKey(String(index));
+    setEditingSection(section);
   };
 
   const handleDelete = async (section, index) => {
@@ -92,6 +104,9 @@ export default function AmenitiesAdmin({ initialData }) {
       nextData.amenitiesPage[section] = (nextData.amenitiesPage?.[section] || []).filter((_, idx) => idx !== index);
       await saveAll(nextData);
       setRoomsData(nextData);
+      setEditingKey('');
+      setEditingSection('');
+      setItemForm(emptyItem);
       setStatus({ type:'success', message:'Amenity removed successfully.' });
     } catch (error) {
       console.error(error);

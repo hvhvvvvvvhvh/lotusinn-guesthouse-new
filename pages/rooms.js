@@ -20,7 +20,10 @@ export default function Rooms() {
   useEffect(() => {
     fetch('/data/roomsData.json')
       .then((res) => res.json())
-      .then(setData)
+      .then(json => {
+        const bySlug = Object.fromEntries((json.roomsPage.availableRooms || []).map(room => [room.slug, room]));
+        setData({ ...json, roomsPage: { ...json.roomsPage, masterRooms: (json.roomsPage.masterRooms || []).filter(room => bySlug[room.slug]).map(room => ({ ...room, ...bySlug[room.slug] })) } });
+      })
       .catch((err) => console.error('Failed to load rooms data:', err));
   }, []);
 

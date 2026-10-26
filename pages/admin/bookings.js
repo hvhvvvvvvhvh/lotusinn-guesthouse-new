@@ -1,42 +1,18 @@
+import { requireAdminPage } from '../../lib/adminAuth.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { filePaths, readJson } from '../../lib/dataStore';
+import { bookingAmount, localToday } from '../../lib/booking.js';
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const denied = await requireAdminPage(context);
+  if (denied) return denied;
+
+
   const data = await readJson(filePaths.bookings);
   return { props: { items: data.bookings || [] } };
 }
 
-const demoBookings = [
-  {
-    id: 'demo-1',
-    fullName: 'Ali Khan',
-    phone: '03001234567',
-    email: 'ali@example.com',
-    roomType: 'Deluxe Room',
-    checkIn: '2026-04-25',
-    checkOut: '2026-04-27',
-    guests: 2,
-    amount: 14000,
-    status: 'Pending',
-    payment: 'Unpaid',
-    specialRequests: 'Late check-in requested.',
-  },
-  {
-    id: 'demo-2',
-    fullName: 'Sadia Khan',
-    phone: '03121234567',
-    email: 'sadia@example.com',
-    roomType: 'Family Room',
-    checkIn: '2026-04-28',
-    checkOut: '2026-04-30',
-    guests: 4,
-    amount: 18000,
-    status: 'Confirmed',
-    payment: 'Partial',
-    specialRequests: 'Breakfast included.',
-  },
-];
 
 function getNights(checkIn, checkOut) {
   if (!checkIn || !checkOut) return 0;
@@ -56,6 +32,7 @@ function normalizeBooking(item, index) {
   const checkOut = item.checkOut || item.checkout || '';
 
   return {
+    ...item,
     id: item.id || `booking-${index + 1}`,
     fullName: item.fullName || item.name || 'Guest',
     phone: item.phone || item.mobile || 'N/A',
@@ -65,15 +42,15 @@ function normalizeBooking(item, index) {
     checkOut,
     guests: Number(item.guests || item.guestCount || 1),
     nights: getNights(checkIn, checkOut),
-    amount: Number(item.amount || item.totalAmount || 0),
+    amount: bookingAmount(item),
     status: item.status || 'Pending',
     payment: item.payment || 'Unpaid',
-    specialRequests: item.specialRequests || item.notes || '',
+    specialRequests: item.notes ?? item.specialRequests ?? '',
   };
 }
 
 export default function AdminBookings({ items }) {
-  const initialItems = items && items.length ? items : demoBookings;
+  const initialItems = items || [];
 
   const [bookings, setBookings] = useState(
     initialItems.map((item, index) => normalizeBooking(item, index))
@@ -86,25 +63,36 @@ export default function AdminBookings({ items }) {
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState(null);
 
-  const updateStatus = (id, status) => {
-    setBookings((prev) =>
-      prev.map((booking) =>
-        booking.id === id ? { ...booking, status } : booking
-      )
-    );
-  };
+  const [notice, setNotice] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const updatePayment = (id, payment) => {
-    setBookings((prev) =>
-      prev.map((booking) =>
-        booking.id === id ? { ...booking, payment } : booking
-      )
-    );
+  const persistBooking = async (id, patch, method = 'PATCH') => {
+    if (saving) return null;
+    setSaving(true);
+    setNotice('');
+    try {
+      const response = await fetch('/api/admin/bookings', {
+        method, headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...patch }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Unable to save booking.');
+      if (method === 'DELETE') {
+        setBookings(prev => prev.filter(item => item.id !== id));
+        setSelectedBooking(null);
+      } else {
+        const updated = normalizeBooking(result.booking, 0);
+        setBookings(prev => prev.map(item => item.id === id ? updated : item));
+        setSelectedBooking(prev => prev?.id === id ? updated : prev);
+        return updated;
+      }
+    } catch (error) { setNotice(error.message); }
+    finally { setSaving(false); }
+    return null;
   };
-
-  const deleteBooking = (id) => {
-    setBookings((prev) => prev.filter((booking) => booking.id !== id));
-  };
+  const updateStatus = (id, status) => persistBooking(id, { status });
+  const updatePayment = (id, payment) => persistBooking(id, { payment });
+  const deleteBooking = id => persistBooking(id, {}, 'DELETE');
 
   const openView = (booking) => {
     setSelectedBooking(booking);
@@ -125,21 +113,13 @@ export default function AdminBookings({ items }) {
     }));
   };
 
-  const saveEdit = () => {
-    const updated = {
-      ...editForm,
-      guests: Number(editForm.guests || 1),
-      amount: Number(editForm.amount || 0),
-      nights: getNights(editForm.checkIn, editForm.checkOut),
-    };
-
-    setBookings((prev) =>
-      prev.map((booking) => (booking.id === updated.id ? updated : booking))
-    );
-
-    setSelectedBooking(updated);
-    setEditForm(updated);
-    setEditMode(false);
+  const saveEdit = async () => {
+    const updated = await persistBooking(editForm.id, {
+      ...editForm, notes: editForm.specialRequests,
+      roomSlug: editForm.roomType === selectedBooking.roomType ? editForm.roomSlug : '',
+      guests: Number(editForm.guests), amount: Number(editForm.amount),
+    });
+    if (updated) { setEditForm(updated); setEditMode(false); }
   };
 
   const filteredBookings = useMemo(() => {
@@ -164,11 +144,10 @@ export default function AdminBookings({ items }) {
 
   const totals = useMemo(() => {
     return {
-      todayArrivals: 2,
-      todayDepartures: 1,
+      todayArrivals: bookings.filter(b => b.checkIn === localToday() && !['Cancelled', 'No Show'].includes(b.status)).length,
+      todayDepartures: bookings.filter(b => b.checkOut === localToday() && !['Cancelled', 'No Show'].includes(b.status)).length,
       activeStays:
-        bookings.filter((b) => ['Confirmed', 'Checked In'].includes(b.status))
-          .length || 1,
+        bookings.filter(b => ['Confirmed', 'Checked In'].includes(b.status) && b.checkIn <= localToday() && b.checkOut > localToday()).length,
       revenue: bookings.reduce((sum, b) => sum + Number(b.amount || 0), 0),
     };
   }, [bookings]);
@@ -176,6 +155,8 @@ export default function AdminBookings({ items }) {
   return (
     <AdminLayout title="Manage guest bookings, reservations, payments and stay status.">
       <div className="bookings-page-shell modern">
+        {notice && <div className="admin-alert error" role="alert">{notice}</div>}
+        {saving && <p role="status">Saving booking…</p>}
         <div className="booking-stats-grid compact">
           <div className="booking-stat-card flat">
             <span>Today Arrivals</span>
@@ -274,7 +255,7 @@ export default function AdminBookings({ items }) {
                       {booking.status}
                     </span>
                     <select
-                      className="booking-inline-select"
+                      className="booking-inline-select" disabled={saving}
                       value={booking.status}
                       onChange={(e) => updateStatus(booking.id, e.target.value)}
                     >
@@ -289,7 +270,7 @@ export default function AdminBookings({ items }) {
 
                   <td data-label="Payment">
                     <select
-                      className="booking-inline-select"
+                      className="booking-inline-select" disabled={saving}
                       value={booking.payment}
                       onChange={(e) => updatePayment(booking.id, e.target.value)}
                     >
@@ -307,7 +288,7 @@ export default function AdminBookings({ items }) {
                       <button className="booking-btn edit" onClick={() => openEdit(booking)}>
                         Edit
                       </button>
-                      <button className="booking-btn delete" onClick={() => deleteBooking(booking.id)}>
+                      <button className="booking-btn delete" disabled={saving} onClick={() => deleteBooking(booking.id)}>
                         Delete
                       </button>
                     </div>
@@ -355,7 +336,7 @@ export default function AdminBookings({ items }) {
                   </div>
 
                   <div className="booking-modal-actions">
-                    <button type="button" className="booking-save-btn" onClick={() => setEditMode(true)}>
+                    <button type="button" className="booking-save-btn" disabled={saving} onClick={() => setEditMode(true)}>
                       Edit Booking
                     </button>
                   </div>
@@ -400,7 +381,7 @@ export default function AdminBookings({ items }) {
                   </label>
 
                   <div className="booking-modal-actions">
-                    <button type="button" className="booking-save-btn" onClick={saveEdit}>
+                    <button type="button" className="booking-save-btn" disabled={saving} onClick={saveEdit}>
                       Save Changes
                     </button>
                     <button type="button" className="booking-cancel-btn" onClick={() => setEditMode(false)}>

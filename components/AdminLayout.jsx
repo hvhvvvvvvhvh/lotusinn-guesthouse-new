@@ -1,61 +1,3 @@
-// import Link from 'next/link';
-// import { useRouter } from 'next/router';
-
-// const navItems = [
-//   { href: '/admin', label: 'Dashboard', icon: 'fa-solid fa-table-columns' },
-//   { href: '/admin/rooms', label: 'Rooms Management', icon: 'fa-solid fa-bed' },
-//   { href: '/admin/availability', label: 'Room Availability', icon: 'fa-solid fa-door-open' },
-//   { href: '/admin/bookings', label: 'Bookings', icon: 'fa-solid fa-calendar-check' },
-//   { href: '/admin/expenses', label: 'Expenses', icon: 'fa-solid fa-wallet' },
-//   { href: '/admin/amenities', label: 'Amenities', icon: 'fa-solid fa-spa' },
-//   { href: '/admin/messages', label: 'Guest Messages', icon: 'fa-solid fa-envelope' }
-// ];
-
-// export default function AdminLayout({ children, title, contentSection = false }) {
-//   const router = useRouter();
-//   return (
-//     <div className={`admin-app ${contentSection ? "content-admin-app" : ""}`}>
-//       <aside className="admin-sidebar">
-//         <div className="admin-brand">
-//           <img src="/images/LotusInnLogo.png" alt="Lotus Inn Guest House" onError={(e)=>{e.currentTarget.src='/images/lotusinn-logo.png';}} />
-//           <div>
-//             <h1>Lotus Inn Guest House</h1>
-//             <p>Admin Panel</p>
-//           </div>
-//         </div>
-//         <nav className="admin-nav">
-//           {navItems.map((item) => (
-//             <Link key={item.href} href={item.href} className={router.pathname === item.href ? 'active' : ''}>
-//               <i className={item.icon}></i>
-//               <span>{item.label}</span>
-//             </Link>
-            
-//           ))}
-//         </nav>
-//       </aside>
-//       <main className="admin-main">
-//         <div className="admin-topbar">
-//           <div>
-//             <h2>Welcome <span>Lotus Inn Admin</span></h2>
-//             <p style={{margin:'8px 0 0',color:'#6c7890'}}>{title || 'Manage rooms, bookings and guest communication from one place.'}</p>
-//           </div>
-//           <div style={{display:'flex',gap:'14px',alignItems:'center'}}>
-//             <div className="admin-search">
-//               <i className="fa-solid fa-magnifying-glass"></i>
-//               <input placeholder="Search dashboard" />
-//             </div>
-//             <div className="admin-actions">
-//               <div className="admin-circle"><i className="fa-regular fa-bell"></i><span className="admin-badge">9</span></div>
-//               <div className="admin-avatar">LG</div>
-//             </div>
-//           </div>
-//         </div>
-//         {children}
-//       </main>
-//     </div>
-//   );
-// }
-
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -79,6 +21,8 @@ export default function AdminLayout({ children, title, contentSection = false })
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [pageSearch, setPageSearch] = useState('');
+  const activeHref = navItems.filter(item => router.pathname === item.href || router.pathname.startsWith(item.href + '/')).sort((a,b) => b.href.length - a.href.length)[0]?.href;
 
   return (
     <div className={`admin-app ${contentSection ? "content-admin-app" : ""}`}>
@@ -100,11 +44,11 @@ export default function AdminLayout({ children, title, contentSection = false })
         </div>
 
         <nav className="admin-nav">
-          {navItems.map((item) => (
+          {navItems.filter(item => `${item.label} ${item.href}`.toLowerCase().includes(pageSearch.trim().toLowerCase())).map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={router.pathname === item.href || (item.content && router.pathname.startsWith(item.href) && item.href !== "/admin/blogs/new" && item.href !== "/admin/authors/new") ? "active" : ""}
+              className={activeHref === item.href ? "active" : ""}
             >
               <i className={item.icon}></i>
               <span>{item.label}</span>
@@ -142,7 +86,7 @@ export default function AdminLayout({ children, title, contentSection = false })
             {/* Search */}
             <div className="admin-search">
               <i className="fa-solid fa-magnifying-glass"></i>
-              <input placeholder="Search dashboard" />
+              <input aria-label="Find an admin page" placeholder="Find an admin page" value={pageSearch} onChange={event => setPageSearch(event.target.value)} />
             </div>
 
             {/* Actions */}
@@ -150,22 +94,22 @@ export default function AdminLayout({ children, title, contentSection = false })
               {/* Notification */}
               <div className="notification-wrapper">
                 <button
-                  className="admin-circle"
+                  className="admin-circle" aria-label="Open quick links" aria-expanded={showNotifications}
                   onClick={() =>
                     setShowNotifications(!showNotifications)
                   }
                 >
                   <i className="fa-regular fa-bell"></i>
-                  <span className="admin-badge">9</span>
+
                 </button>
 
                 {showNotifications && (
                   <div className="dropdown-box">
-                    <h4>Notifications</h4>
+                    <h4>Quick Links</h4>
                     <ul>
-                      <li>New booking request</li>
-                      <li>Room availability updated</li>
-                      <li>Guest sent a message</li>
+                      <li><Link href="/admin/bookings">Review bookings</Link></li>
+                      <li><Link href="/admin/availability">Check room availability</Link></li>
+                      <li><Link href="/admin/messages">Read guest messages</Link></li>
                     </ul>
                   </div>
                 )}
@@ -174,7 +118,7 @@ export default function AdminLayout({ children, title, contentSection = false })
               {/* Profile */}
               <div className="profile-wrapper">
                 <button
-                  className="admin-avatar"
+                  className="admin-avatar" aria-label="Open admin profile" aria-expanded={showProfile}
                   onClick={() => setShowProfile(!showProfile)}
                 >
                   LG
