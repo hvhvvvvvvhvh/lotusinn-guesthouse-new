@@ -1,17 +1,9 @@
-import { requireAdminPage } from '../../lib/adminAuth.js';
+import { adminRequest } from '../../lib/adminClient.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { filePaths, readJson } from '../../lib/dataStore';
 import { bookingAmount, localToday } from '../../lib/booking.js';
 
-export async function getServerSideProps(context) {
-  const denied = await requireAdminPage(context);
-  if (denied) return denied;
 
-
-  const data = await readJson(filePaths.bookings);
-  return { props: { items: data.bookings || [] } };
-}
 
 
 function getNights(checkIn, checkOut) {
@@ -71,7 +63,7 @@ export default function AdminBookings({ items }) {
     setSaving(true);
     setNotice('');
     try {
-      const response = await fetch('/api/admin/bookings', {
+      const response = await adminRequest('/api/admin/bookings', {
         method, headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...patch }),
       });

@@ -7,9 +7,10 @@ import { publicAuthor } from '../../lib/publicContent.js';
 
 export async function getStaticProps(context) {
   const { params } = context;
-  const [page, authors, blogs] = await Promise.all([publicPage(context), getAuthors(), getBlogs()]);
+  const [page, authors] = await Promise.all([publicPage(context), getAuthors({ slug: params.slug })]);
   const author = authors.find((item) => item.slug === params.slug);
   if (!author) return { notFound: true, revalidate: 60 };
+  const blogs = await getBlogs({ authorId: author.id, fields: ['id', 'title', 'slug', 'status', 'authorId'] });
   return { revalidate: 60, props: { siteLayout: page.props.siteLayout, siteImages: page.props.siteImages, author: publicAuthor(author), blogs: blogs.filter((blog) => blog.authorId === author.id && blog.status === 'Published').map(blog => ({ id: blog.id, title: blog.title, slug: blog.slug })) } };
 }
 

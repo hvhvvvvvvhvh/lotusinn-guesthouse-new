@@ -1,23 +1,10 @@
+import { adminRequest } from '../../lib/adminClient.js';
 import SiteImage from '../../components/SiteImage';
-import { requireAdminPage } from '../../lib/adminAuth.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { filePaths, readJson } from '../../lib/dataStore';
 import { occupiesRoom } from '../../lib/booking.js';
 
-export async function getServerSideProps(context) {
-  const denied = await requireAdminPage(context);
-  if (denied) return denied;
 
-
-  const [roomsData, bookingsData] = await Promise.all([readJson(filePaths.rooms), readJson(filePaths.bookings)]);
-  return {
-    props: {
-      initialRoomsData: roomsData,
-      initialBookings: bookingsData.bookings || []
-    }
-  };
-}
 
 function normalizeStatus(status) {
   return String(status || 'Available').trim();
@@ -58,7 +45,7 @@ export default function RoomAvailability({ initialRoomsData, initialBookings }) 
   }), [derivedRooms]);
 
   const saveAll = async (nextData) => {
-    const res = await fetch('/api/admin/rooms', {
+    const res = await adminRequest('/api/admin/rooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(nextData)

@@ -1,18 +1,10 @@
+import { adminRequest } from '../../lib/adminClient.js';
 import { useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import SiteImage from '../../components/SiteImage';
-import { requireAdminPage } from '../../lib/adminAuth.js';
-import { filePaths, readJson } from '../../lib/dataStore.js';
-import { imageSlots, withImageDefaults } from '../../lib/imageSlots.js';
 import { uploadImage } from '../../lib/imageUpload.js';
-import { adminImageSlots } from '../../lib/adminImageSlots.js';
 
-export async function getServerSideProps(context) {
-  const denied = await requireAdminPage(context);
-  if (denied) return denied;
-  const [site, rooms] = await Promise.all([readJson(filePaths.site), readJson(filePaths.rooms)]);
-  return { props: { initialSlots: adminImageSlots(imageSlots(withImageDefaults(site), rooms)) } };
-}
+
 const sections = { images: 'Page banners & backgrounds', layout: 'Logo', home: 'Home page', about: 'About page', galleryPage: 'Gallery', roomsPage: 'Room cards', roomDetails: 'Room detail galleries' };
 const friendly = slot => slot.label;
 
@@ -37,7 +29,7 @@ export default function WebsiteImages({ initialSlots }) {
     event.preventDefault();
     setBusy(true); setNotice('Saving…');
     try {
-      const response = await fetch('/api/admin/images', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: selected.id, value: value.trim(), expectedHash: selected.expectedHash }) });
+      const response = await adminRequest('/api/admin/images', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: selected.id, value: value.trim(), expectedHash: selected.expectedHash }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Unable to save image.');
       setSlots(previous => previous.map(slot => slot.id === selected.id ? { ...slot, value: result.value, preview: result.value, expectedHash: result.expectedHash } : slot));

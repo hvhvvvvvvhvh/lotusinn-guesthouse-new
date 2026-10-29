@@ -1,15 +1,6 @@
-import { requireAdminPage } from '../../lib/adminAuth.js';
 import AdminLayout from '../../components/AdminLayout';
-import { filePaths, readJson } from '../../lib/dataStore';
-
-export async function getServerSideProps(context) {
-  const denied = await requireAdminPage(context);
-  if (denied) return denied;
 
 
-  const data = await readJson(filePaths.messages);
-  return { props: { items: data.messages || [] } };
-}
 
 export default function AdminMessages({ items }) {
   return (

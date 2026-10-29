@@ -1,16 +1,8 @@
-import { requireAdminPage } from '../../lib/adminAuth.js';
+import { adminRequest } from '../../lib/adminClient.js';
 import { useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { filePaths, readJson } from '../../lib/dataStore';
-
-export async function getServerSideProps(context) {
-  const denied = await requireAdminPage(context);
-  if (denied) return denied;
 
 
-  const roomsData = await readJson(filePaths.rooms);
-  return { props: { initialData: roomsData } };
-}
 
 const sectionMap = {
   essential: 'Essential In-Room Amenities',
@@ -31,7 +23,7 @@ export default function AmenitiesAdmin({ initialData }) {
   const amenitiesPage = roomsData?.amenitiesPage || {};
 
   const saveAll = async (nextData) => {
-    const res = await fetch('/api/admin/rooms', {
+    const res = await adminRequest('/api/admin/rooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(nextData)

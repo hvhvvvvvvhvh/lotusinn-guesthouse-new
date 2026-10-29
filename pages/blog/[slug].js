@@ -9,11 +9,11 @@ import { publicBlog, publicAuthor } from '../../lib/publicContent.js';
 
 export async function getStaticProps(context) {
   const { params } = context;
-  const [page, blogs, authors] = await Promise.all([publicPage(context), getBlogs(), getAuthors()]);
+  const [page, blogs, authors, matchingBlogs] = await Promise.all([publicPage(context), getBlogs(), getAuthors(), getBlogs({ slug: params.slug, full: true })]);
   const publishedBlogs = blogs
     .filter((b) => b.status === 'Published')
     .sort((a, b) => String(b.publishDate || '').localeCompare(String(a.publishDate || '')));
-  const blog = publishedBlogs.find((b) => b.slug === params.slug);
+  const blog = matchingBlogs[0];
   if (!blog) return { notFound: true, revalidate: 60 };
 
   return {
@@ -52,7 +52,7 @@ export default function BlogDetail({ blog, author, related }) {
           <article className="lotus-article-main">
                         {blog.featuredImage && (
               <figure className="lotus-article-featured-wrap">
-                <SiteImage className="lotus-article-featured" src={blog.featuredImage} alt={blog.title} />
+                <SiteImage loading="eager" fetchPriority="high" className="lotus-article-featured" src={blog.featuredImage} alt={blog.title} />
               </figure>
             )}
             <header className="lotus-article-header">

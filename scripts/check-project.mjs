@@ -58,6 +58,7 @@ try {
   const adminPages = ['/admin', '/admin/rooms', '/admin/availability', '/admin/bookings', '/admin/expenses', '/admin/messages', '/admin/amenities', '/admin/blogs', '/admin/blogs/new', '/admin/authors', '/admin/authors/new'];
   for (const route of adminPages) await request(route, { status: 307 });
   await request('/admin/images', { status: 307 });
+  await request('/api/admin/page?path=/admin/expenses', { status: 401 });
   await request('/api/admin/images', { status: 401 });
   await request('/api/admin/images/upload', { method: 'POST', status: 401 });
   await request('/api/admin/media?blog=missing', { status: 401 });
@@ -75,7 +76,7 @@ try {
   assert.match(setCookie, /HttpOnly/);
   assert.match(setCookie, /Secure/);
   cookie = setCookie.split(';')[0];
-  for (const route of adminPages) await request(route, { admin: true });
+  for (const route of adminPages) { await request(route, { admin: true }); const loaded = await request('/api/admin/page?path=' + encodeURIComponent(route), { admin: true }); assert.match(loaded.headers.get('server-timing'), /data;dur=/); }
   await request('/admin/images', { admin: true });
   const slots = (await (await request('/api/admin/images', { admin: true })).json()).slots;
   const hero = slots.find(slot => slot.id === 'site:images.hero');
@@ -141,10 +142,10 @@ try {
 
   await request('/api/messages', { method: 'POST', body: { ...guest, subject: 'Test inquiry', message: 'Message body persists.' }, status: 201 });
   await request('/api/messages', { method: 'POST', body: { ...guest, subject: 'Invalid', message: '' }, status: 400 });
-  const messagesPage = await (await request('/admin/messages', { admin: true })).text();
+  const messagesPage = await (await request('/api/admin/page?path=/admin/messages', { admin: true })).text();
   assert.match(messagesPage, /Message body persists/);
   await request('/api/admin/expenses', { method: 'POST', admin: true, body: { expenses: {} }, status: 400 });
-  await request('/api/admin/expenses', { method: 'POST', admin: true, body: { expenses: [{ id: 'test', title: 'Supplies', category: 'Rooms', amount: 500, date: tomorrow, paymentMethod: 'Cash', note: '' }] } });
+  await request('/api/admin/expenses', { method: 'POST', admin: true, body: { expense: { id: 'test', title: 'Supplies', category: 'Rooms', amount: 500, date: tomorrow, paymentMethod: 'Cash', note: '' } } });
   assert.equal((await (await request('/api/admin/expenses', { admin: true })).json()).expenses[0].amount, 500);
   await request('/api/admin/rooms', { method: 'POST', admin: true, body: {}, status: 400 });
   const rooms = await (await request('/api/admin/rooms', { admin: true })).json();
@@ -182,8 +183,8 @@ try {
   await request(`/api/media?blog=${blog.id}`, { status: 404 });
   const privatePreview = await request(`/api/admin/media?blog=${blog.id}`, { admin: true });
   assert.equal(privatePreview.headers.get('cache-control'), 'no-store');
-  const authorList = await (await request('/admin/authors', { admin: true })).text();
-  const blogList = await (await request('/admin/blogs', { admin: true })).text();
+  const authorList = await (await request('/api/admin/page?path=/admin/authors', { admin: true })).text();
+  const blogList = await (await request('/api/admin/page?path=/admin/blogs', { admin: true })).text();
   assert.ok(authorList.length < 100000, 'Author lists should contain counts, not full articles or embedded photos.');
   assert.ok(blogList.length < 100000, 'Blog lists should contain summaries, not article bodies or embedded photos.');
   await request('/api/admin/blogs', { method: 'POST', admin: true, body: { ...article, id: blog.id, status: 'Published', featuredImage: 'data:image/png;base64,' + 'a'.repeat(1100000) } });

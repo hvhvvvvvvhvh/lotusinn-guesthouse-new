@@ -1,18 +1,10 @@
+import { adminRequest } from '../../lib/adminClient.js';
 import SiteImage from '../../components/SiteImage';
-import { requireAdminPage } from '../../lib/adminAuth.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { filePaths, readJson } from '../../lib/dataStore';
 import { uploadImage } from '../../lib/imageUpload.js';
 
-export async function getServerSideProps(context) {
-  const denied = await requireAdminPage(context);
-  if (denied) return denied;
 
-
-  const roomsData = await readJson(filePaths.rooms);
-  return { props: { initialData: roomsData } };
-}
 
 const emptyForm = {
   slug:'',
@@ -71,7 +63,7 @@ export default function RoomsAdmin({ initialData }) {
   };
 
   const saveAll = async (nextData) => {
-    const res = await fetch('/api/admin/rooms', {
+    const res = await adminRequest('/api/admin/rooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(nextData)

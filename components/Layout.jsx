@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import SiteImage, { optimizedImageUrl } from './SiteImage';
+import styles from '../styles/public.module.css';
 
 export default function Layout({ children, initialLayout, images }) {
   const { pathname } = useRouter();
@@ -25,7 +26,7 @@ export default function Layout({ children, initialLayout, images }) {
   const hasBanner = !pathname.startsWith('/blog') && !pathname.startsWith('/authors');
 
   return (
-    <div className="site-shell" style={images ? {
+    <div className={styles.surface}><div className="site-shell" style={images ? {
       '--site-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.hero))})`,
       '--booking-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.bookingHero))})`,
       '--contact-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.contactHero))})`,
@@ -141,6 +142,6 @@ export default function Layout({ children, initialLayout, images }) {
 
         <div className="footer-bottom">{footer?.copyright || ''}</div>
       </footer>
-    </div>
+    </div></div>
   );
 }

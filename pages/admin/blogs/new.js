@@ -1,11 +1,10 @@
+import { adminRequest } from '../../../lib/adminClient.js';
 import SiteImage from '../../../components/SiteImage';
 import { useRouter } from 'next/router';
 import { uploadImage } from '../../../lib/imageUpload.js';
-import { requireAdminPage } from '../../../lib/adminAuth.js';
 import { useState } from 'react';
 import Link from 'next/link';
 import AdminLayout from '../../../components/AdminLayout';
-import { getAuthors } from '../../../lib/blogStore';
 
 const blank = {
   title: '', slug: '', authorId: '', category: 'Travel Guide',
@@ -18,13 +17,7 @@ const newBlock = (type = 'paragraph') => ({
   type, text: '', title: '', items: [''], url: '', label: '', question: '', answer: '', alt: ''
 });
 
-export async function getServerSideProps(context) {
-  const denied = await requireAdminPage(context);
-  if (denied) return denied;
 
-
-  return { props: { authors: (await getAuthors()).map(author => ({ id: author.id, name: author.name })) } };
-}
 
 function makeSlug(value = '') {
   return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 90);
@@ -103,7 +96,7 @@ export default function NewBlog({ authors, initialBlog }) {
 
     try {
       setSaving(true);
-      const res = await fetch('/api/admin/blogs', {
+      const res = await adminRequest('/api/admin/blogs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

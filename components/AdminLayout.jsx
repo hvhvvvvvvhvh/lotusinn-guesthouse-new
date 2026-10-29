@@ -1,7 +1,16 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import SiteImage from './SiteImage';
+import { adminRequest } from '../lib/adminClient.js';
+import styles from '../styles/admin.module.css';
+
+const ShellContext = createContext(null);
+export default function AdminLayout({ children, title, contentSection = false }) {
+  const setMetadata = useContext(ShellContext);
+  useEffect(() => { setMetadata?.({ title, contentSection }); }, [setMetadata, title, contentSection]);
+  return <>{children}</>;
+}
 
 const navItems = [
   { href: "/admin/images", label: "Website Images", icon: "fa-solid fa-images" },
@@ -18,16 +27,19 @@ const navItems = [
   { href: "/admin/authors/new", label: "New Author", icon: "fa-solid fa-user-plus", content: true },
 ];
 
-export default function AdminLayout({ children, title, contentSection = false }) {
+export function AdminShell({ children, login = false }) {
   const router = useRouter();
+  const [{ title, contentSection }, setMetadata] = useState({});
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [pageSearch, setPageSearch] = useState('');
   const activeHref = navItems.filter(item => router.pathname === item.href || router.pathname.startsWith(item.href + '/')).sort((a,b) => b.href.length - a.href.length)[0]?.href;
 
+  if (login) return <div className={styles.surface}>{children}</div>;
+
   return (
-    <div className={`admin-app ${contentSection ? "content-admin-app" : ""}`}>
+    <ShellContext.Provider value={setMetadata}><div className={styles.surface}><div className={`admin-app ${contentSection || /\/admin\/(blogs|authors)/.test(router.pathname) ? "content-admin-app" : ""}`}>
       {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-brand">
@@ -50,6 +62,7 @@ export default function AdminLayout({ children, title, contentSection = false })
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
               aria-current={activeHref === item.href ? 'page' : undefined}
               className={activeHref === item.href ? "active" : ""}
             >
@@ -137,7 +150,7 @@ export default function AdminLayout({ children, title, contentSection = false })
                       type="button"
                       className="dropdown-logout"
                       onClick={async () => {
-                        await fetch("/api/admin/logout", { method: "POST" });
+                        await adminRequest("/api/admin/logout", { method: "POST" });
                         window.location.href = "/admin/login";
                       }}
                     >
@@ -152,6 +165,6 @@ export default function AdminLayout({ children, title, contentSection = false })
 
         {children}
       </main>
-    </div>
+    </div></div></ShellContext.Provider>
   );
 }

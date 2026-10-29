@@ -22,6 +22,7 @@ export default async function handler(req, res) {
     } catch { return res.status(400).json({ message: 'This image could not be read. Try a different photo.' }); }
     const id = createHash('sha256').update(bytes).digest('hex');
     await saveImage(id, bytes);
+    await Promise.all([480, 960].map(async width => saveImage(id, await sharp(bytes).resize({ width, withoutEnlargement: true }).webp({ quality: 80 }).toBuffer(), width)));
     return res.status(201).json({ url: `/api/site-image?id=${id}`, bytes: bytes.length });
   } catch (error) {
     console.error('Unable to store website image.', error);

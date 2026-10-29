@@ -1,7 +1,6 @@
-import { getPublicBlogs, getPublicAuthors } from '../../lib/publicBlogStore.js';
-import { getBlogs, getAuthors } from '../../lib/blogStore.js';
 import { filePaths, readJson } from '../../lib/dataStore.js';
 import { imageSlots, withImageDefaults } from '../../lib/imageSlots.js';
+import { getRecord } from '../../lib/recordStore.js';
 
 // Editors store uploads in JSON. Serve images separately rather than embedding
 // megabytes of base64 in page HTML and Next's hydration data.
@@ -14,11 +13,12 @@ export async function serveMedia(req, res, includeDrafts = false) {
       const data = await readJson(filePaths[dataset]);
       source = imageSlots(dataset === 'site' ? withImageDefaults(data) : {}, dataset === 'rooms' ? data : {}, { includeDerived: true }).find(slot => slot.id === req.query.slot)?.value;
     } else if (typeof req.query.blog === 'string') {
-      const blog = (await (includeDrafts ? getBlogs() : getPublicBlogs())).find(item => item.id === req.query.blog && (includeDrafts || item.status === 'Published'));
+      const record = await getRecord('blogs', req.query.blog);
+      const blog = record && (includeDrafts || record.status === 'Published') ? record : null;
       if (typeof req.query.block === 'string' && /^\d+$/.test(req.query.block)) source = blog?.blocks?.[Number(req.query.block)]?.url;
       else source = blog?.featuredImage;
     } else if (typeof req.query.author === 'string') {
-      source = (await (includeDrafts ? getAuthors() : getPublicAuthors())).find(item => item.id === req.query.author)?.image;
+      source = (await getRecord('authors', req.query.author))?.image;
     }
     const match = typeof source === 'string' && /^data:(image\/(?:png|jpe?g|gif|webp|avif|svg\+xml));base64,([a-z0-9+/=\s]+)$/i.exec(source);
     if (!match) return void res.status(404).end();

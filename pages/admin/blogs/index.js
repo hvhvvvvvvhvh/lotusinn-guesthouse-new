@@ -1,19 +1,10 @@
+import { adminRequest } from '../../../lib/adminClient.js';
 import SiteImage from '../../../components/SiteImage';
-import { adminBlogSummary } from '../../../lib/adminContent.js';
-import { requireAdminPage } from '../../../lib/adminAuth.js';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../../components/AdminLayout';
-import { getAuthors, getBlogs } from '../../../lib/blogStore';
-
-export async function getServerSideProps(context) {
-  const denied = await requireAdminPage(context);
-  if (denied) return denied;
 
 
-  const [blogs, authors] = await Promise.all([getBlogs(), getAuthors()]);
-  return { props: { initialBlogs: blogs.map(adminBlogSummary), authors: authors.map(author => ({ id: author.id, name: author.name })) } };
-}
 
 export default function BlogsAdmin({ initialBlogs, authors }) {
   const [blogs, setBlogs] = useState(initialBlogs);
@@ -30,7 +21,7 @@ export default function BlogsAdmin({ initialBlogs, authors }) {
   const removeBlog = async (id) => {
     if (!window.confirm('Delete this blog post? This action cannot be undone.')) return;
     try {
-    const res = await fetch('/api/admin/blogs', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    const res = await adminRequest('/api/admin/blogs', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     if (res.ok) { setBlogs((prev) => prev.filter((item) => item.id !== id)); setNotice('Blog post deleted successfully.'); }
     else setNotice((await res.json()).message || 'Could not delete blog post.');
     } catch (error) { setNotice(error.message || 'Could not delete blog post.'); }

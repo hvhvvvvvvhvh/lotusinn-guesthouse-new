@@ -58,7 +58,7 @@ export default function BlogIndex({ blogs, authors }) {
                   <div className="lotus-featured-bottom"><span>By {featuredAuthor?.name || 'Lotus Inn Team'}</span><Link href={`/blog/${featured.slug}`}>Read Article <span>→</span></Link></div>
                 </div>
                 <Link href={`/blog/${featured.slug}`} className="lotus-featured-image">
-                  {featured.featuredImage ? <SiteImage src={featured.featuredImage} alt={featured.title} /> : <div className="lotus-post-image-fallback">Lotus Inn</div>}
+                  {featured.featuredImage ? <SiteImage loading="eager" fetchPriority="high" src={featured.featuredImage} alt={featured.title} /> : <div className="lotus-post-image-fallback">Lotus Inn</div>}
                 </Link>
 
               </article>

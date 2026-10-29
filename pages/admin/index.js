@@ -1,33 +1,6 @@
-import { requireAdminPage } from '../../lib/adminAuth.js';
 import AdminLayout from '../../components/AdminLayout';
-import { filePaths, readJson } from '../../lib/dataStore';
-import { bookingAmount, localToday } from '../../lib/booking.js';
-
-export async function getServerSideProps(context) {
-  const denied = await requireAdminPage(context);
-  if (denied) return denied;
 
 
-  const [roomsData, bookingsData, messagesData, blogsData] = await Promise.all([
-    readJson(filePaths.rooms), readJson(filePaths.bookings), readJson(filePaths.messages), readJson(filePaths.blogs),
-  ]);
-  const rooms = roomsData?.roomsPage?.availableRooms || [];
-  const bookings = bookingsData.bookings || [];
-  const messages = messagesData.messages || [];
-  const blogs = blogsData.blogs || [];
-  const totalRooms = rooms.length;
-  const activeBookings = bookings.length;
-  const totalMessages = messages.length;
-  const publishedBlogs = blogs.filter((item) => item.status === 'Published').length;
-  const monthlyIncome = bookings.filter(item => !['Cancelled', 'No Show'].includes(item.status)).reduce((sum, item) => sum + bookingAmount(item), 0);
-  const year = localToday().slice(0, 4);
-  const monthly = Array.from({ length: 12 }, (_, index) => {
-    const prefix = year + '-' + String(index + 1).padStart(2, '0');
-    const items = bookings.filter(item => String(item.checkIn || '').startsWith(prefix));
-    return { label: new Date(Date.UTC(Number(year), index, 1)).toLocaleString('en', { month: 'short', timeZone: 'UTC' }), count: items.length };
-  });
-  return { props: { monthly, year, totalRooms, activeBookings, totalMessages, monthlyIncome, publishedBlogs, pendingBookings: bookings.filter(item => (item.status || 'Pending') === 'Pending').length, bookings: bookings.slice(0, 5), messages: messages.slice(0, 5) } };
-}
 
 export default function AdminDashboard({ monthly, year, totalRooms, activeBookings, totalMessages, monthlyIncome, publishedBlogs, pendingBookings, bookings, messages }) {
   const recentBookings = bookings.slice(0, 5);

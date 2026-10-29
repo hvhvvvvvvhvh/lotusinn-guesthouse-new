@@ -1,21 +1,8 @@
-import { requireAdminPage } from '../../lib/adminAuth.js';
+import { adminRequest } from '../../lib/adminClient.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { filePaths, readJson } from '../../lib/dataStore';
-
-export async function getServerSideProps(context) {
-  const denied = await requireAdminPage(context);
-  if (denied) return denied;
 
 
-  const data = await readJson(filePaths.expenses);
-
-  return {
-    props: {
-      items: data.expenses || [],
-    },
-  };
-}
 
 const emptyForm = {
   title: '',
@@ -30,13 +17,14 @@ function formatCurrency(amount) {
   return `PKR ${Number(amount || 0).toLocaleString()}`;
 }
 
-export default function AdminExpenses({ items }) {
+export default function AdminExpenses({ items, expenseTotals }) {
   const [expenses, setExpenses] = useState(items || []);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [notice, setNotice] = useState('');
   const [saving, setSaving] = useState(false);
+  const [summary, setSummary] = useState(expenseTotals);
 
   const categories = [
     'Kitchen',
@@ -56,6 +44,7 @@ export default function AdminExpenses({ items }) {
   }, [expenses, categoryFilter]);
 
   const totals = useMemo(() => {
+    if (summary) return summary;
     const total = expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     const kitchen = expenses
       .filter((item) => item.category === 'Kitchen')
@@ -68,7 +57,7 @@ export default function AdminExpenses({ items }) {
       .reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
     return { total, kitchen, fuel, staff };
-  }, [expenses]);
+  }, [expenses, summary]);
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -96,13 +85,14 @@ export default function AdminExpenses({ items }) {
     setSaving(true);
     setNotice('');
     try {
-      const response = await fetch('/api/admin/expenses', {
+      const response = await adminRequest('/api/admin/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ expenses: updatedExpenses }),
+        body: JSON.stringify({ expense: payload }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to save expenses.');
+      setSummary(current => { if (!current) return current; const next = { ...current }; const previous = expenses.find(item => item.id === editingId); for (const [item, sign] of [[previous, -1], [payload, 1]]) { if (!item) continue; next.total += sign * Number(item.amount); const key = item.category.toLowerCase(); if (['kitchen', 'fuel', 'staff'].includes(key)) next[key] += sign * Number(item.amount); } return next; });
       setExpenses(updatedExpenses);
       resetForm();
     } catch (error) {
@@ -128,13 +118,14 @@ export default function AdminExpenses({ items }) {
     setSaving(true);
     setNotice('');
     try {
-      const response = await fetch('/api/admin/expenses', {
-        method: 'POST',
+      const response = await adminRequest('/api/admin/expenses', {
+        method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ expenses: updatedExpenses }),
+        body: JSON.stringify({ id }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to delete expense.');
+      setSummary(current => { if (!current) return current; const item = expenses.find(item => item.id === id); const next = { ...current, total: current.total - Number(item.amount) }; const key = item.category.toLowerCase(); if (['kitchen', 'fuel', 'staff'].includes(key)) next[key] -= Number(item.amount); return next; });
       setExpenses(updatedExpenses);
       if (editingId === id) resetForm();
     } catch (error) {

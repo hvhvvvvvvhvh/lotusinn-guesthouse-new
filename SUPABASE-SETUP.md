@@ -10,7 +10,7 @@ Open the project's SQL Editor and run `supabase/migrations/202610260001_lotus_st
 
 This adds `public.lotus_documents` and `public.lotus_compare_and_set`. It preserves existing tables, enables Row Level Security and denies anonymous/authenticated browser access. Only the server's secret/service-role credentials can read or change application datasets.
 
-The seven dataset keys are `site`, `rooms`, `bookings`, `messages`, `expenses`, `blogs`, and `authors`. Each row contains the original JSON shape plus a version. Atomic version checks protect read/modify/write operations across application instances. Full-document editor saves intentionally replace that document, like the existing editor behavior; simultaneous admins should refresh before saving the same room/expense document.
+The seven import dataset keys are `site`, `rooms`, `bookings`, `messages`, `expenses`, `blogs`, and `authors`. Site and room documents retain atomic version checks. After importing, run `supabase/migrations/202610290001_record_queries.sql` to copy the five collections into indexed individual rows. It retains original documents and installs private record-mutation and aggregate functions; only service-role requests can use them.
 
 ## 3. Configure the server privately
 
@@ -32,10 +32,11 @@ Restart the app after changing environment variables. For a hosted website, add 
 
 ```powershell
 npm run supabase:migrate
-npm run supabase:check
 ```
 
 The importer inserts missing datasets only. Existing `lotus_documents` rows are left unchanged. If the old `lotus_blog_posts`/`lotus_blog_authors` tables exist, their records are preserved and take precedence over local records with the same ID. Other tables and the local files are retained. Re-running the migration does not overwrite database content.
+
+Before deploying this version, run the second SQL migration in the SQL Editor **after** the import, then `npm run supabase:check`. Back up both tables first when upgrading an existing deployment. `scripts/backup-record-migration.mjs ABSOLUTE_BACKUP_DIRECTORY` captures the legacy documents before conversion; `scripts/verify-record-migration.mjs` checks every copied value/order and totals immediately after conversion. That comparison is for migration time: legacy collection documents stop being authoritative once the new app writes individual records. Do not roll back to an older app without first synchronizing those documents from current records.
 
 The connection checker reads all seven datasets and verifies that an intentionally stale write is rejected. It does not modify records. Once verified, use the admin interface to check saving and refresh the public pages to check visibility.
 
@@ -49,7 +50,7 @@ npm run test:integration
 
 The automated integration suite forces JSON mode with disposable data, even when `.env.local` points to a real database. Use `supabase:check` to validate the selected real database. Never run destructive test flows against live guest records.
 
-Embedded editor uploads remain in JSONB for compatibility; local stock images remain in `public/images`. A dedicated image-storage migration can be added separately. Database backups should include `lotus_documents`.
+New editor uploads are compressed into the private `lotus-website-images` Storage bucket and served through the immutable image endpoint. Database backups should include `lotus_documents`, `lotus_records`, and the image bucket. Legacy embedded images remain supported.
 
 ## Troubleshooting
 

@@ -1,7 +1,7 @@
 import { invalidatePublicContent } from '../../../lib/publicStore.js';
 import { requireAdminApi } from '../../../lib/adminAuth.js';
-import { getBlogs, getAuthors, makeId, slugify } from '../../../lib/blogStore';
-import { filePaths, updateJson } from '../../../lib/dataStore.js';
+import { getBlogs, makeId, slugify } from '../../../lib/blogStore';
+import { getRecord, mutateRecord } from '../../../lib/recordStore.js';
 import { text, invalid, apiError } from '../../../lib/validation.js';
 import { contentFields, safeUrl, validateBlocks, publishFields } from '../../../lib/contentValidation.js';
 
@@ -16,29 +16,20 @@ export default async function handler(req, res) {
       if (!slug) invalid('A valid blog slug is required.');
       const id = text(body.id, 'Blog id') || makeId('blog');
       const authorId = text(body.authorId, 'Author', { required: true });
-      if (!(await getAuthors()).some(item => item.id === authorId)) invalid('Please select an existing author.');
+      if (!await getRecord('authors', authorId)) invalid('Please select an existing author.');
       const fields = contentFields(body, ['category', 'excerpt', 'metaTitle', 'keywords', 'metaDescription', 'featuredImage']);
       if (fields.featuredImage && !safeUrl(fields.featuredImage, true)) invalid('Use a valid featured image URL.');
       const publication = publishFields(body);
       const blocks = validateBlocks(body.blocks || []);
-      let previousSlug;
-      const data = await updateJson(filePaths.blogs, data => {
-        const blogs = data?.blogs || [];
-        if (blogs.some(item => item.slug === slug && item.id !== id)) throw Object.assign(new Error('That blog slug is already in use.'), { status: 409 });
-        const current = blogs.find(item => item.id === id);
-        previousSlug = current?.slug;
-        const blog = { ...fields, ...publication, id, title, slug, authorId, blocks, category: fields.category || 'Travel Guide', createdAt: current?.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
-        return { blogs: current ? blogs.map(item => item.id === id ? blog : item) : [blog, ...blogs] };
-      });
-      await invalidatePublicContent('blogs', res, previousSlug ? [`/blog/${previousSlug}`] : []);
-      return res.status(200).json({ success: true, blog: data.blogs.find(item => item.id === id) });
+      const result = await mutateRecord('blogs', id, 'upsert', { ...fields, ...publication, id, title, slug, authorId, blocks, category: fields.category || 'Travel Guide', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+      await invalidatePublicContent('blogs', res, [result.previous, result.record]);
+      return res.status(200).json({ success: true, blog: result.record });
     }
     if (req.method === 'DELETE') {
       const id = text(req.body?.id || req.query?.id, 'Blog id', { required: true });
-      let previousSlug;
-      const data = await updateJson(filePaths.blogs, data => { previousSlug = data?.blogs?.find(item => item.id === id)?.slug; return { blogs: (data?.blogs || []).filter(item => item.id !== id) }; });
-      await invalidatePublicContent('blogs', res, previousSlug ? [`/blog/${previousSlug}`] : []);
-      return res.status(200).json({ success: true, blogs: data.blogs });
+      const result = await mutateRecord('blogs', id, 'delete');
+      await invalidatePublicContent('blogs', res, [result.previous]);
+      return res.status(200).json({ success: true });
     }
     res.setHeader('Allow', 'GET, POST, DELETE');
     return res.status(405).json({ message: 'Method not allowed.' });
