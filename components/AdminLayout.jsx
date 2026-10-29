@@ -43,13 +43,13 @@ export function AdminShell({ children, login = false }) {
       {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-brand">
-          <SiteImage loading="eager" sizes="160px"
+          <a href="/"><SiteImage loading="eager" sizes="160px"
             src="/images/LotusInnLogo.png"
             alt="Lotus Inn"
             onError={(e) => {
               e.currentTarget.src = "/images/lotusinn-logo.png";
             }}
-          />
+          /></a>
 
           <div>
             <h1>Lotus Inn Guest House</h1>
