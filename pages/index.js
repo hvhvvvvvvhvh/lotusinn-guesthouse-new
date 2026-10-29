@@ -1,15 +1,34 @@
-import { useEffect, useState } from 'react';
-import initialSiteData from '../public/data/siteData.json';
+import Link from 'next/link';
+import SiteImage from '../components/SiteImage';
+import { cachePublicPage } from '../lib/publicPage.js';
+import { withImageDefaults } from '../lib/imageSlots.js';
+import { publicDataset } from '../lib/publicDataset.js';
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { readPublicJson } from '../lib/publicStore.js';
+import { getPublicBlogs as getBlogs } from '../lib/publicBlogStore.js';
+import { publicBlog } from '../lib/publicContent.js';
 
-export default function Home() {
-  const [data, setData] = useState(initialSiteData);
+export async function getStaticProps(context) {
+  const [site, rooms, blogs] = await Promise.all([readPublicJson('site'), readPublicJson('rooms'), getBlogs()]);
+  cachePublicPage(context.res);
+  const publicSite = publicDataset(withImageDefaults(site), 'site');
+  const publicRooms = publicDataset(rooms, 'rooms');
+  const seen = new Set();
+  const posts = blogs.filter(blog => blog.status === 'Published').sort((a,b) => String(b.publishDate).localeCompare(String(a.publishDate))).filter(blog => { if (seen.has(blog.slug)) return false; seen.add(blog.slug); return true; }).slice(0, 3);
+  return { revalidate: 60, props: { siteLayout: publicSite.layout, siteImages: publicSite.images, data: { home: { ...publicSite.home,
+    rooms: { ...site.home.rooms, cards: publicRooms.roomsPage.availableRooms.slice(0, 3).map(room => ({ image: room.image, title: room.title, price: room.price, link: `/room/${room.slug}`, linkLabel: 'View Details' })) },
+    blog: { ...site.home.blog, posts: posts.map(blog => ({ title: blog.title, excerpt: blog.excerpt || '', image: publicBlog(blog).featuredImage || '/images/DSC_0271.JPG', link: `/blog/${blog.slug}`, linkLabel: 'Read More' })) },
+  } } } };
+}
 
-  useEffect(() => {
-    fetch('/data/siteData.json')
-      .then((res) => res.json())
-      .then(setData)
-      .catch((err) => console.error('Failed to load home data:', err));
-  }, []);
+export default function Home({ data }) {
+  const router = useRouter();
+  const [dates, setDates] = useState({ checkIn: '', checkOut: '', guests: '2' });
+  const updateDates = (name, event) => {
+    const value = event.target.value;
+    setDates(previous => ({ ...previous, [name]: value }));
+  };
 
   const home = data?.home;
 
@@ -20,14 +39,14 @@ export default function Home() {
           <h1 dangerouslySetInnerHTML={{ __html: home?.hero?.title || '' }} />
           <p>{home?.hero?.subtitle}</p>
 
-          <div className="booking-bar">
-            {(home?.hero?.bookingPlaceholders || []).map((placeholder, index) => (
-              <input key={index} placeholder={placeholder} />
-            ))}
-            <a href={home?.hero?.bookingButton?.href || '/book-now'}>
+          <form className="booking-bar" onSubmit={event => { event.preventDefault(); router.push({ pathname: '/book-now', query: dates }); }}>
+            <input aria-label="Check-in date" type="date" value={dates.checkIn} onChange={event => updateDates('checkIn', event)} />
+            <input aria-label="Check-out date" type="date" min={dates.checkIn || undefined} value={dates.checkOut} onChange={event => updateDates('checkOut', event)} />
+            <input aria-label="Number of guests" type="number" min="1" max="50" value={dates.guests} onChange={event => updateDates('guests', event)} />
+            <button type="submit">
               {home?.hero?.bookingButton?.label || 'Check Availability'}
-            </a>
-          </div>
+            </button>
+          </form>
         </div>
         <div className="bg_overlay"></div>
       </section>
@@ -40,10 +59,10 @@ export default function Home() {
         <div className="cards">
           {(home?.rooms?.cards || []).map((room, index) => (
             <div className="card" key={index}>
-              <img src={room.image} alt={room.title} loading="lazy" decoding="async" width="560" height="360" />
+              <SiteImage src={room.image} alt={room.title} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 360px" />
               <h3>{room.title}</h3>
               <p>{room.price}</p>
-              <a href={room.link}>{room.linkLabel}</a>
+              <Link href={room.link}>{room.linkLabel}</Link>
             </div>
           ))}
         </div>
@@ -69,7 +88,7 @@ export default function Home() {
 
         <div className="gallery-wrapper">
           {(home?.gallery?.images || []).map((image, index) => (
-            <img key={index} src={image} alt={`Gallery ${index + 1}`} loading="lazy" decoding="async" width="480" height="320" />
+            <SiteImage key={index} src={image} alt={`Gallery ${index + 1}`} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 300px" />
           ))}
         </div>
       </section>
@@ -84,7 +103,7 @@ export default function Home() {
               <div className="reviews-group" key={groupIndex}>
                 {group.map((review, reviewIndex) => (
                   <div className="review-card" key={reviewIndex}>
-                    <img src={review.image} alt={review.name} loading="lazy" decoding="async" width="64" height="64" />
+                    <SiteImage src={review.image} alt={review.name} sizes="100px" />
                     <div>
                       <p>{review.text}</p>
                       <h4>{review.name}</h4>
@@ -109,10 +128,10 @@ export default function Home() {
         <div className="blog-wrapper">
           {(home?.blog?.posts || []).map((post, index) => (
             <div className="blog-card" key={index}>
-              <img src={post.image} alt={post.title} loading="lazy" decoding="async" width="560" height="360" />
+              <SiteImage src={post.image} alt={post.title} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 360px" />
               <h3>{post.title}</h3>
               <p>{post.excerpt}</p>
-              <a href={post.link}>{post.linkLabel}</a>
+              <Link href={post.link}>{post.linkLabel}</Link>
             </div>
           ))}
         </div>
@@ -120,7 +139,7 @@ export default function Home() {
 
       <section className="cta-section">
         <h2 className="section-title">{home?.cta?.title}</h2>
-        <a href={home?.cta?.href || '/book-now'}>{home?.cta?.label}</a>
+        <Link href={home?.cta?.href || '/book-now'}>{home?.cta?.label}</Link>
       </section>
     </>
   );
