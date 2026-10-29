@@ -1,15 +1,11 @@
-import { useEffect, useState } from 'react';
+import SiteImage from '../components/SiteImage';
+import { publicPage } from '../lib/publicPage.js';
+export async function getServerSideProps(context) { return publicPage(context, 'site'); }
 import Link from 'next/link';
 
-export default function About() {
-  const [data, setData] = useState(null);
+export default function About({ data: initialData }) {
+  const data = initialData;
 
-  useEffect(() => {
-    fetch('/api/site-data?dataset=site')
-      .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
-      .then(setData)
-      .catch((err) => console.error('Failed to load about data:', err));
-  }, []);
 
   const about = data?.about;
 
@@ -27,7 +23,7 @@ export default function About() {
         <section className="about-intro container">
           <div className="left">
             {(about?.intro?.images || []).map((image, index) => (
-              <img key={index} src={image} alt={`About ${index + 1}`} />
+              <SiteImage key={index} src={image} alt={`About ${index + 1}`} />
             ))}
           </div>
 
@@ -61,7 +57,7 @@ export default function About() {
           <div className="cards">
             {(about?.roomsPreview?.cards || []).map((room, index) => (
               <div className="card" key={index}>
-                <img src={room.image} alt={room.title} />
+                <SiteImage src={room.image} alt={room.title} />
                 <h3>{room.title}</h3>
                 <p>{room.price}</p>
               </div>
@@ -83,7 +79,7 @@ export default function About() {
 
         <section className="about-info container">
           <div className="left">
-            <img src={about?.hospitality?.image} alt={about?.hospitality?.title} />
+            <SiteImage src={about?.hospitality?.image} alt={about?.hospitality?.title} />
           </div>
 
           <div className="right">
@@ -107,7 +103,7 @@ export default function About() {
 
           <div className="about_gallery">
             {(about?.gallery?.images || []).map((image, index) => (
-              <img key={index} src={image} alt={`Gallery ${index + 1}`} />
+              <SiteImage key={index} src={image} alt={`Gallery ${index + 1}`} />
             ))}
           </div>
         </section>

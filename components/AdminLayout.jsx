@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 const navItems = [
+  { href: "/admin/images", label: "Website Images", icon: "fa-solid fa-images" },
   { href: "/admin", label: "Dashboard", icon: "fa-solid fa-table-columns" },
   { href: "/admin/rooms", label: "Rooms Management", icon: "fa-solid fa-bed" },
   { href: "/admin/availability", label: "Room Availability", icon: "fa-solid fa-door-open" },

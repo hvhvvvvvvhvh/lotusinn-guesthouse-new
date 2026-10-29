@@ -1,3 +1,4 @@
+import { uploadImage } from '../../../lib/imageUpload.js';
 import { requireAdminPage } from '../../../lib/adminAuth.js';
 import { useState } from 'react';
 import Link from 'next/link';
@@ -27,36 +28,7 @@ function makeSlug(value = '') {
   return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 90);
 }
 
-function readImage(file, maxWidth = 1800, quality = 0.82) {
-  return new Promise((resolve, reject) => {
-    if (!file) return reject(new Error('No image selected.'));
-    if (!file.type.startsWith('image/')) return reject(new Error('Please select a valid image file.'));
-    if (file.type === 'image/svg+xml') {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result));
-      reader.onerror = () => reject(new Error('Unable to read image.'));
-      reader.readAsDataURL(file);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const scale = Math.min(1, maxWidth / img.width);
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.width * scale));
-        canvas.height = Math.max(1, Math.round(img.height * scale));
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-      img.onerror = () => reject(new Error('Unable to process image.'));
-      img.src = String(reader.result);
-    };
-    reader.onerror = () => reject(new Error('Unable to read image.'));
-    reader.readAsDataURL(file);
-  });
-}
+const readImage = uploadImage;
 
 export default function NewBlog({ authors, initialBlog }) {
   const [form, setForm] = useState(() => initialBlog ? { ...blank, ...initialBlog } : blank);

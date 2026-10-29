@@ -1,12 +1,15 @@
+import SiteImage from '../../components/SiteImage';
+import { publicPage } from '../../lib/publicPage.js';
 import Link from 'next/link';
-import { filePaths, readJson } from '../../lib/dataStore';
 
-export async function getServerSideProps({ params }) {
-  const data = await readJson(filePaths.rooms);
+export async function getServerSideProps(context) {
+  const { params } = context;
+  const page = await publicPage(context, 'rooms');
+  const data = page.props.data;
   if (!Object.hasOwn(data.roomDetails || {}, params.type)) return { notFound: true };
   const card = data.roomsPage.availableRooms.find(item => item.slug === params.type);
   const detail = data.roomDetails[params.type];
-  return { props: { room: { ...detail, ...(card ? { price: card.price, availability: card.availability || 'Available' } : {}) }, type: params.type, bookingBenefits: data.bookingBenefits || [] } };
+  return { props: { siteLayout: page.props.siteLayout, siteImages: page.props.siteImages, room: { ...detail, ...(card ? { price: card.price, availability: card.availability || 'Available' } : {}) }, type: params.type, bookingBenefits: data.bookingBenefits || [] } };
 }
 
 const RoomDetail = ({ room, type, bookingBenefits }) => {
@@ -23,7 +26,7 @@ const RoomDetail = ({ room, type, bookingBenefits }) => {
 
       <div className="gallery">
         {(room.images || []).map((img, index) => (
-          <img key={index} src={img} alt={room.name} />
+          <SiteImage key={index} src={img} alt={room.name} />
         ))}
       </div>
 

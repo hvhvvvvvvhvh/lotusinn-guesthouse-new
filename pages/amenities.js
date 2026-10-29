@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { publicPage } from '../lib/publicPage.js';
+export async function getServerSideProps(context) { return publicPage(context, 'rooms'); }
 import Link from 'next/link';
 
 function AmenitiesSection({ title, text, items = [] }) {
@@ -21,15 +22,9 @@ function AmenitiesSection({ title, text, items = [] }) {
   );
 }
 
-export default function AmenitiesPage() {
-  const [data, setData] = useState(null);
+export default function AmenitiesPage({ data: initialData }) {
+  const data = initialData.amenitiesPage;
 
-  useEffect(() => {
-    fetch('/api/site-data?dataset=rooms')
-      .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
-      .then((json) => setData(json.amenitiesPage))
-      .catch((err) => console.error('Failed to load amenities data:', err));
-  }, []);
 
   return (
     <>

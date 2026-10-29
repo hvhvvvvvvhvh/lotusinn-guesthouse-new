@@ -6,6 +6,7 @@ import net from 'node:net';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { setTimeout as delay } from 'node:timers/promises';
+import sharp from 'sharp';
 
 // Every private-data mutation uses a disposable directory, never real records.
 const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'lotus-integration-'));
@@ -20,7 +21,7 @@ const port = socket.address().port;
 await new Promise(resolve => socket.close(resolve));
 const password = crypto.randomUUID();
 const server = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '--hostname', '127.0.0.1', '--port', String(port)], {
-  env: { ...process.env, NODE_ENV: 'production', LOTUS_STORAGE_DRIVER: 'json', ADMIN_PASSWORD: password, ADMIN_SESSION_SECRET: crypto.randomUUID(), LOTUS_DATA_DIR: directory, LOTUS_PUBLIC_DATA_DIR: publicDirectory },
+  env: { ...process.env, NODE_ENV: 'production', LOTUS_STORAGE_DRIVER: 'json', ADMIN_PASSWORD: password, ADMIN_SESSION_SECRET: crypto.randomUUID(), LOTUS_DATA_DIR: directory, LOTUS_PUBLIC_DATA_DIR: publicDirectory, LOTUS_MEDIA_DIR: path.join(directory, 'uploads') },
   stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
 });
 let logs = '';
@@ -29,8 +30,8 @@ server.stderr.on('data', data => { logs = (logs + data).slice(-12000); });
 const base = `http://127.0.0.1:${port}`;
 let cookie = '';
 let checks = 0;
-async function request(url, { method = 'GET', body, admin = false, headers = {}, status = 200 } = {}) {
-  const response = await fetch(base + url, { method, headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(admin ? { Cookie: cookie } : {}), ...headers }, ...(body ? { body: JSON.stringify(body) } : {}), redirect: 'manual' });
+async function request(url, { method = 'GET', body, rawBody, admin = false, headers = {}, status = 200 } = {}) {
+  const response = await fetch(base + url, { method, headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(admin ? { Cookie: cookie } : {}), ...headers }, ...(rawBody ? { body: rawBody } : body ? { body: JSON.stringify(body) } : {}), redirect: 'manual' });
   assert.equal(response.status, status, `${method} ${url}: ${await response.clone().text().then(t => t.slice(0, 200))}`);
   checks++;
   return response;
@@ -45,6 +46,9 @@ try {
   for (const route of ['/room/missing-room', '/blog/missing-blog', '/authors/missing-author']) await request(route, { status: 404 });
   const adminPages = ['/admin', '/admin/rooms', '/admin/availability', '/admin/bookings', '/admin/expenses', '/admin/messages', '/admin/amenities', '/admin/blogs', '/admin/blogs/new', '/admin/authors', '/admin/authors/new'];
   for (const route of adminPages) await request(route, { status: 307 });
+  await request('/admin/images', { status: 307 });
+  await request('/api/admin/images', { status: 401 });
+  await request('/api/admin/images/upload', { method: 'POST', status: 401 });
   for (const name of ['bookings', 'messages', 'expenses', 'rooms', 'authors', 'blogs']) await request(`/api/admin/${name}`, { status: 401 });
   await request('/api/admin/bookings', { status: 401, headers: { 'x-middleware-subrequest': 'middleware:middleware:middleware:middleware:middleware' } });
   await request('/api/bookings', { status: 405 });
@@ -60,6 +64,45 @@ try {
   assert.match(setCookie, /Secure/);
   cookie = setCookie.split(';')[0];
   for (const route of adminPages) await request(route, { admin: true });
+  await request('/admin/images', { admin: true });
+  const slots = (await (await request('/api/admin/images', { admin: true })).json()).slots;
+  const hero = slots.find(slot => slot.id === 'site:images.hero');
+  assert.ok(hero);
+  await request('/api/admin/images', { method: 'PATCH', admin: true, body: { id: 'site:__proto__.polluted', value: '/images/test.webp' }, status: 400 });
+  await request('/api/admin/images', { method: 'PATCH', admin: true, body: { id: hero.id, value: 'javascript:alert(1)' }, status: 400 });
+  await request('/api/admin/images', { method: 'PATCH', admin: true, body: { id: hero.id, value: 'https://user:password@example.com/photo.jpg' }, status: 400 });
+  await request('/api/admin/images/upload', { method: 'POST', admin: true, rawBody: 'invalid', headers: { 'Content-Type': 'image/png' }, status: 400 });
+  await request('/api/admin/images/upload', { method: 'POST', admin: true, rawBody: '<svg/>', headers: { 'Content-Type': 'image/svg+xml' }, status: 400 });
+  const photo = await sharp({ create: { width: 2200, height: 1100, channels: 3, background: '#036045' } }).png().toBuffer();
+  const uploaded = await (await request('/api/admin/images/upload', { method: 'POST', admin: true, rawBody: photo, headers: { 'Content-Type': 'image/png' }, status: 201 })).json();
+  assert.match(uploaded.url, /^\/api\/site-image\?id=[a-f0-9]{64}$/);
+  const served = await request(uploaded.url);
+  assert.match(served.headers.get('cache-control'), /immutable/);
+  assert.equal(served.headers.get('content-type'), 'image/webp');
+  const optimized = await sharp(Buffer.from(await served.arrayBuffer())).metadata();
+  assert.equal(optimized.width, 1600);
+  assert.equal(optimized.height, 800);
+  assert.equal(optimized.exif, undefined);
+  await request('/api/admin/images', { method: 'PATCH', admin: true, body: { id: hero.id, expectedHash: hero.expectedHash, value: uploaded.url } });
+  const site = await (await request('/api/site-data?dataset=site')).json();
+  assert.equal(site.images.hero, uploaded.url);
+  assert.match(await (await request('/')).text(), new RegExp(uploaded.url.replace('?', '\\?')));
+  await request('/api/admin/images', { method: 'PATCH', admin: true, body: { id: hero.id, expectedHash: hero.expectedHash, value: hero.value }, status: 409 });
+  await request('/api/site-image?id=../../secret', { status: 404 });
+  await request('/api/site-image?id=' + 'f'.repeat(64), { status: 404 });
+  const roomSlot = slots.find(slot => slot.id === 'rooms:roomDetails.deluxe.images.0');
+  assert.ok(roomSlot);
+  await request('/api/admin/images', { method: 'PATCH', admin: true, body: { id: roomSlot.id, value: uploaded.url } });
+  assert.match(await (await request('/room/deluxe')).text(), new RegExp(uploaded.url.replace('?', '\\?')));
+  // Existing base64 photos must not bloat public page HTML or JSON responses.
+  const roomFile = path.join(publicDirectory, 'roomsData.json');
+  const legacyRooms = JSON.parse(await fs.readFile(roomFile, 'utf8'));
+  legacyRooms.roomDetails.deluxe.images[0] = 'data:image/png;base64,' + photo.toString('base64');
+  await fs.writeFile(roomFile, JSON.stringify(legacyRooms));
+  const publicRooms = await (await request('/api/site-data?dataset=rooms')).json();
+  assert.match(publicRooms.roomDetails.deluxe.images[0], /^\/api\/media\?/);
+  assert.ok(!(await (await request('/room/deluxe')).text()).includes('data:image/png;base64,'));
+  await request(publicRooms.roomDetails.deluxe.images[0]);
   await request('/api/admin/expenses', { method: 'POST', admin: true, body: { expenses: [] }, headers: { Origin: 'https://example.com' }, status: 403 });
 
   const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);

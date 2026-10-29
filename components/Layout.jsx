@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Head from 'next/head';
+import SiteImage, { optimizedImageUrl } from './SiteImage';
 
-export default function Layout({ children }) {
-  const [siteData, setSiteData] = useState(null);
+export default function Layout({ children, initialLayout, images }) {
+  const [siteData, setSiteData] = useState(() => initialLayout ? { layout: initialLayout } : null);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
+    if (initialLayout) { setSiteData({ layout: initialLayout }); return; }
     fetch('/api/site-data?dataset=site')
       .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
       .then(setSiteData)
       .catch((err) => console.error('Failed to load site data:', err));
-  }, []);
+  }, [initialLayout]);
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -18,14 +21,19 @@ export default function Layout({ children }) {
   const footer = siteData?.layout?.footer;
 
   return (
-    <>
+    <div className="site-shell" style={images ? {
+      '--site-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.hero))})`,
+      '--booking-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.bookingHero))})`,
+      '--contact-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.contactHero))})`,
+    } : undefined}>
+      {images && <Head><link rel="preload" as="image" href={optimizedImageUrl(images.hero)} /></Head>}
       <header className="header">
         <div className="nav">
           <h2 className="logo">
             <Link href="/" onClick={closeMenu}>
-              <img
+              <SiteImage
                 src={header?.logo || '/images/LotusInnLogo.png'}
-                alt="Lotus Inn Guest House"
+                alt="Lotus Inn Guest House" loading="eager" sizes="160px"
               />
             </Link>
           </h2>
@@ -50,7 +58,7 @@ export default function Layout({ children }) {
 
           <nav className={`menu ${menuOpen ? 'show' : ''}`} aria-label="Main navigation">
             <div className="mobile-menu-logo">
-              <img src="/images/LotusInnLogo.png" alt="Lotus Inn" />
+              <SiteImage src={header?.logo || '/images/LotusInnLogo.png'} alt="Lotus Inn" sizes="160px" />
             </div>
             {(header?.menu || []).map((item) => (
               <Link key={item.path} href={item.path} onClick={closeMenu}>
@@ -129,6 +137,6 @@ export default function Layout({ children }) {
 
         <div className="footer-bottom">{footer?.copyright || ''}</div>
       </footer>
-    </>
+    </div>
   );
 }

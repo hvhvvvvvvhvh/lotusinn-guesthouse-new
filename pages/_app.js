@@ -12,7 +12,7 @@ export default function MyApp({ Component, pageProps, router }) {
   }
 
   return (
-    <Layout>
+    <Layout initialLayout={pageProps.siteLayout || pageProps.data?.layout} images={pageProps.siteImages}>
       <Component {...pageProps} />
     </Layout>
   );

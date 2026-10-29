@@ -1,8 +1,11 @@
+import SiteImage from '../components/SiteImage';
+import { publicPage } from '../lib/publicPage.js';
+export async function getServerSideProps(context) { return publicPage(context, 'site'); }
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
-export default function Gallery() {
-  const [data, setData] = useState(null);
+export default function Gallery({ data: initialData }) {
+  const data = initialData;
   const [filter, setFilter] = useState('all');
   const [popup, setPopup] = useState(null);
   useEffect(() => {
@@ -12,12 +15,6 @@ export default function Gallery() {
     return () => window.removeEventListener('keydown', close);
   }, [popup]);
 
-  useEffect(() => {
-    fetch('/api/site-data?dataset=site')
-      .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
-      .then(setData)
-      .catch((err) => console.error('Failed to load gallery data:', err));
-  }, []);
 
   const galleryPage = data?.galleryPage;
 
@@ -47,7 +44,7 @@ export default function Gallery() {
       <div className="gallery-grid">
         {filteredImages.map((img, index) => (
           <div className="gallery-item" key={index} role="button" tabIndex={0} aria-label={`Open gallery image ${index + 1}`} onClick={() => setPopup(img.src)} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setPopup(img.src); } }}>
-            <img src={img.src} alt="Gallery" />
+            <SiteImage src={img.src} alt="Gallery" />
             <div className="hover">
               <i className="fa-solid fa-magnifying-glass"></i>
             </div>
@@ -57,7 +54,7 @@ export default function Gallery() {
 
       {popup && (
         <div className="popup" onClick={() => setPopup(null)}>
-          <img src={popup} alt="Popup" />
+          <SiteImage src={popup} alt="Popup" />
         </div>
       )}
 

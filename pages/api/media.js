@@ -1,4 +1,6 @@
 import { getBlogs, getAuthors } from '../../lib/blogStore';
+import { filePaths, readJson } from '../../lib/dataStore.js';
+import { imageSlots, withImageDefaults } from '../../lib/imageSlots.js';
 
 // Editors store uploads in JSON. Serve images separately rather than embedding
 // megabytes of base64 in page HTML and Next's hydration data.
@@ -6,7 +8,11 @@ export default async function handler(req, res) {
   if (!['GET', 'HEAD'].includes(req.method)) { res.setHeader('Allow', 'GET, HEAD'); return void res.status(405).end(); }
   try {
     let source;
-    if (typeof req.query.blog === 'string') {
+    if (['site', 'rooms'].includes(req.query.dataset) && typeof req.query.slot === 'string') {
+      const dataset = req.query.dataset;
+      const data = await readJson(filePaths[dataset]);
+      source = imageSlots(dataset === 'site' ? withImageDefaults(data) : {}, dataset === 'rooms' ? data : {}, { includeDerived: true }).find(slot => slot.id === req.query.slot)?.value;
+    } else if (typeof req.query.blog === 'string') {
       const blog = (await getBlogs()).find(item => item.id === req.query.blog && item.status === 'Published');
       if (typeof req.query.block === 'string' && /^\d+$/.test(req.query.block)) source = blog?.blocks?.[Number(req.query.block)]?.url;
       else source = blog?.featuredImage;

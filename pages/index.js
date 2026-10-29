@@ -1,15 +1,22 @@
+import SiteImage from '../components/SiteImage';
+import { cachePublicPage } from '../lib/publicPage.js';
+import { withImageDefaults } from '../lib/imageSlots.js';
+import { publicDataset } from '../lib/publicDataset.js';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { filePaths, readJson } from '../lib/dataStore';
 import { getBlogs } from '../lib/blogStore';
 import { publicBlog } from '../lib/publicContent.js';
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
   const [site, rooms, blogs] = await Promise.all([readJson(filePaths.site), readJson(filePaths.rooms), getBlogs()]);
+  cachePublicPage(context.res);
+  const publicSite = publicDataset(withImageDefaults(site), 'site');
+  const publicRooms = publicDataset(rooms, 'rooms');
   const seen = new Set();
   const posts = blogs.filter(blog => blog.status === 'Published').sort((a,b) => String(b.publishDate).localeCompare(String(a.publishDate))).filter(blog => { if (seen.has(blog.slug)) return false; seen.add(blog.slug); return true; }).slice(0, 3);
-  return { props: { data: { home: { ...site.home,
-    rooms: { ...site.home.rooms, cards: rooms.roomsPage.availableRooms.slice(0, 3).map(room => ({ image: room.image, title: room.title, price: room.price, link: `/room/${room.slug}`, linkLabel: 'View Details' })) },
+  return { props: { siteLayout: publicSite.layout, siteImages: publicSite.images, data: { home: { ...publicSite.home,
+    rooms: { ...site.home.rooms, cards: publicRooms.roomsPage.availableRooms.slice(0, 3).map(room => ({ image: room.image, title: room.title, price: room.price, link: `/room/${room.slug}`, linkLabel: 'View Details' })) },
     blog: { ...site.home.blog, posts: posts.map(blog => ({ title: blog.title, excerpt: blog.excerpt || '', image: publicBlog(blog).featuredImage || '/images/DSC_0271.JPG', link: `/blog/${blog.slug}`, linkLabel: 'Read More' })) },
   } } } };
 }
@@ -51,7 +58,7 @@ export default function Home({ data }) {
         <div className="cards">
           {(home?.rooms?.cards || []).map((room, index) => (
             <div className="card" key={index}>
-              <img src={room.image} alt={room.title} />
+              <SiteImage src={room.image} alt={room.title} />
               <h3>{room.title}</h3>
               <p>{room.price}</p>
               <a href={room.link}>{room.linkLabel}</a>
@@ -80,7 +87,7 @@ export default function Home({ data }) {
 
         <div className="gallery-wrapper">
           {(home?.gallery?.images || []).map((image, index) => (
-            <img key={index} src={image} alt={`Gallery ${index + 1}`} />
+            <SiteImage key={index} src={image} alt={`Gallery ${index + 1}`} />
           ))}
         </div>
       </section>
@@ -95,7 +102,7 @@ export default function Home({ data }) {
               <div className="reviews-group" key={groupIndex}>
                 {group.map((review, reviewIndex) => (
                   <div className="review-card" key={reviewIndex}>
-                    <img src={review.image} alt={review.name} />
+                    <SiteImage src={review.image} alt={review.name} />
                     <div>
                       <p>{review.text}</p>
                       <h4>{review.name}</h4>
@@ -120,7 +127,7 @@ export default function Home({ data }) {
         <div className="blog-wrapper">
           {(home?.blog?.posts || []).map((post, index) => (
             <div className="blog-card" key={index}>
-              <img src={post.image} alt={post.title} />
+              <SiteImage src={post.image} alt={post.title} />
               <h3>{post.title}</h3>
               <p>{post.excerpt}</p>
               <a href={post.link}>{post.linkLabel}</a>

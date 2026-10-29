@@ -1,9 +1,13 @@
+import { publicPage } from '../../lib/publicPage.js';
+import SiteImage from '../../components/SiteImage';
 import Head from 'next/head';
 import Link from 'next/link';
 import { getBlogs, getAuthors } from '../../lib/blogStore';
 import { publicBlog, publicAuthor } from '../../lib/publicContent.js';
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const { params } = context;
+  const page = await publicPage(context);
   const [blogs, authors] = await Promise.all([getBlogs(), getAuthors()]);
   const published = blogs
     .filter((b) => b.status === 'Published')
@@ -18,7 +22,7 @@ export async function getServerSideProps() {
     return true;
   });
 
-  return { props: { blogs: unique.map(blog => publicBlog(blog)), authors: authors.map(publicAuthor) } };
+  return { props: { siteLayout: page.props.siteLayout, siteImages: page.props.siteImages, blogs: unique.map(blog => publicBlog(blog)), authors: authors.map(publicAuthor) } };
 }
 
 export default function BlogIndex({ blogs, authors }) {
@@ -55,7 +59,7 @@ export default function BlogIndex({ blogs, authors }) {
                   <div className="lotus-featured-bottom"><span>By {featuredAuthor?.name || 'Lotus Inn Team'}</span><Link href={`/blog/${featured.slug}`}>Read Article <span>→</span></Link></div>
                 </div>
                 <Link href={`/blog/${featured.slug}`} className="lotus-featured-image">
-                  {featured.featuredImage ? <img src={featured.featuredImage} alt={featured.title} /> : <div className="lotus-post-image-fallback">Lotus Inn</div>}
+                  {featured.featuredImage ? <SiteImage src={featured.featuredImage} alt={featured.title} /> : <div className="lotus-post-image-fallback">Lotus Inn</div>}
                 </Link>
 
               </article>
@@ -66,7 +70,7 @@ export default function BlogIndex({ blogs, authors }) {
                   <div className="lotus-sidebar-list">
                     {latest.length ? latest.map((item) => (
                       <Link href={`/blog/${item.slug}`} key={item.id} className="lotus-sidebar-item">
-                        {item.featuredImage ? <img src={item.featuredImage} alt="" /> : <div className="lotus-sidebar-fallback">L</div>}
+                        {item.featuredImage ? <SiteImage src={item.featuredImage} alt="" /> : <div className="lotus-sidebar-fallback">L</div>}
                         <div><strong>{item.title}</strong><small>{item.publishDate || ''}</small></div>
                       </Link>
                     )) : <p className="lotus-sidebar-empty">More articles will appear here soon.</p>}
@@ -97,7 +101,7 @@ export default function BlogIndex({ blogs, authors }) {
                 return (
                   <article key={blog.id} className="lotus-post-card">
                     <Link href={`/blog/${blog.slug}`} className="lotus-post-card-image" aria-label={`Read ${blog.title}`}>
-                      {blog.featuredImage ? <img src={blog.featuredImage} alt={blog.title} /> : <div className="lotus-post-image-fallback">Lotus Inn</div>}
+                      {blog.featuredImage ? <SiteImage src={blog.featuredImage} alt={blog.title} /> : <div className="lotus-post-image-fallback">Lotus Inn</div>}
                       <span className="lotus-card-category">{blog.category || 'Travel Guide'}</span>
                     </Link>
                     <div className="lotus-post-card-body">

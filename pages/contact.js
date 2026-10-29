@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { publicPage } from '../lib/publicPage.js';
+export async function getServerSideProps(context) { return publicPage(context, 'site'); }
+import { useMemo, useRef, useState } from 'react';
 
 const initialForm = {
   fullName: '',
@@ -8,29 +10,13 @@ const initialForm = {
   message: ''
 };
 
-export default function Contact() {
-  const [data, setData] = useState(null);
+export default function Contact({ data: initialData }) {
+  const data = initialData.contactPage;
   const sending = useRef(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(() => ({ ...initialForm, subject: initialData.contactPage?.form?.subjects?.[0] || initialForm.subject }));
   const [status, setStatus] = useState({ type: '', message: '' });
 
-  useEffect(() => {
-    fetch('/api/site-data?dataset=site')
-      .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
-      .then((json) => {
-        const pageData = json.contactPage;
-        setData(pageData);
-        setForm((prev) => ({
-          ...prev,
-          subject: pageData?.form?.subjects?.[0] || prev.subject
-        }));
-      })
-      .catch((err) => {
-        console.error('Failed to load contact page data:', err);
-        setStatus({ type: 'error', message: 'Contact details could not be loaded. Please refresh the page.' });
-      });
-  }, []);
 
   const contactValues = useMemo(() => {
     const cards = data?.cards || [];

@@ -1,3 +1,5 @@
+import { withImageDefaults } from '../lib/imageSlots.js';
+import { publicDataset } from '../lib/publicDataset.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { filePaths, readJson } from '../lib/dataStore';
@@ -5,7 +7,8 @@ import { filePaths, readJson } from '../lib/dataStore';
 export async function getServerSideProps() {
   const [site, rooms] = await Promise.all([readJson(filePaths.site), readJson(filePaths.rooms)]);
   const listed = rooms.roomsPage.availableRooms;
-  return { props: { bookingData: { ...site.bookingPage, form: { ...site.bookingPage.form, roomTypes: listed.map(room => room.title) }, pricingCards: listed.map(room => ({ title: room.title, price: room.price, text: room.description || room.text || '', slug: room.slug })) } } };
+  const publicSite = publicDataset(withImageDefaults(site), 'site');
+  return { props: { siteLayout: publicSite.layout, siteImages: publicSite.images, bookingData: { ...site.bookingPage, form: { ...site.bookingPage.form, roomTypes: listed.map(room => room.title) }, pricingCards: listed.map(room => ({ title: room.title, price: room.price, text: room.description || room.text || '', slug: room.slug })) } } };
 }
 
 const initialForm = {

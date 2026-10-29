@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import SiteImage from '../components/SiteImage';
+import { publicPage } from '../lib/publicPage.js';
+export async function getServerSideProps(context) { return publicPage(context, 'rooms'); }
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 
 function bookingHref(room) {
@@ -11,21 +14,12 @@ function bookingHref(room) {
   return `/book-now?${params.toString()}`;
 }
 
-export default function Rooms() {
-  const [data, setData] = useState(null);
+export default function Rooms({ data: initialData }) {
+  const data = initialData;
   const [selectedType, setSelectedType] = useState('Room Type');
   const [selectedPrice, setSelectedPrice] = useState('Price Range');
   const [searchClicked, setSearchClicked] = useState(false);
 
-  useEffect(() => {
-    fetch('/api/site-data?dataset=rooms')
-      .then((res) => { if (!res.ok) throw new Error('Unable to load website content.'); return res.json(); })
-      .then(json => {
-        const bySlug = Object.fromEntries((json.roomsPage.availableRooms || []).map(room => [room.slug, room]));
-        setData({ ...json, roomsPage: { ...json.roomsPage, masterRooms: (json.roomsPage.masterRooms || []).filter(room => bySlug[room.slug]).map(room => ({ ...room, ...bySlug[room.slug] })) } });
-      })
-      .catch((err) => console.error('Failed to load rooms data:', err));
-  }, []);
 
   const roomsPage = data?.roomsPage;
 
@@ -59,7 +53,7 @@ export default function Rooms() {
   const renderRoomCard = (room, showIcons = 'badges') => (
     <div className="room-card" key={room.slug}>
       <div className="image-box">
-        <img src={room.image} alt={room.title} />
+        <SiteImage src={room.image} alt={room.title} />
         <span className="tag">{room.tag}</span>
         {room.availability ? (
           <span className={`availability-tag ${String(room.availability).toLowerCase()}`}>

@@ -2,6 +2,7 @@ import { requireAdminPage } from '../../lib/adminAuth.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { filePaths, readJson } from '../../lib/dataStore';
+import { uploadImage } from '../../lib/imageUpload.js';
 
 export async function getServerSideProps(context) {
   const denied = await requireAdminPage(context);
@@ -57,20 +58,15 @@ export default function RoomsAdmin({ initialData }) {
 
   const handleChange = (e) => { const { name, value } = e.target; setForm((prev) => ({ ...prev, [name]: value })); };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setStatus({ type:'error', message:'Please select a valid image file.' });
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setForm((prev) => ({ ...prev, image: String(reader.result || '') }));
-      setStatus({ type:'success', message:'Image uploaded successfully. Save the room to keep it.' });
-    };
-    reader.onerror = () => setStatus({ type:'error', message:'Image upload failed. Please try another image.' });
-    reader.readAsDataURL(file);
+    try {
+      setStatus({ type:'', message:'Uploading and optimizing image…' });
+      const image = await uploadImage(file);
+      setForm(previous => ({ ...previous, image }));
+      setStatus({ type:'success', message:'Image uploaded and optimized. Save the room to keep it.' });
+    } catch (error) { setStatus({ type:'error', message:error.message }); }
   };
 
   const saveAll = async (nextData) => {
