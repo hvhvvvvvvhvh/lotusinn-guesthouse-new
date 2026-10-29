@@ -53,7 +53,7 @@ export default function WebsiteImages({ initialSlots }) {
     <label className="image-section-filter">Page or section <select value={filter} onChange={event => setFilter(event.target.value)}><option value="all">All images</option>{Object.entries(sections).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label>
     {selected && <form className="admin-panel image-editor" onSubmit={save} aria-label="Edit website image">
       <h2>{friendly(selected)}</h2>
-      {!failed && (value || selected.preview) && <img src={value || selected.preview} alt="Selected image preview" onError={() => setFailed(true)} />}
+      {!failed && (value || selected.preview) && <SiteImage loading="eager" sizes="(max-width: 900px) 100vw, 800px" src={value || selected.preview} alt="Selected image preview" onError={() => setFailed(true)} />}
       {failed && <p role="alert">This image could not be previewed. Check the URL or choose another photo.</p>}
       <div className="admin-field"><label htmlFor="website-image-url">Image URL</label><input id="website-image-url" required maxLength={2048} value={value} onChange={event => { setValue(event.target.value); setFailed(false); }} disabled={busy} /></div>
       <div className="admin-field"><label htmlFor="website-image-file">Upload replacement photo</label><input id="website-image-file" type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" onChange={upload} disabled={busy} /></div>

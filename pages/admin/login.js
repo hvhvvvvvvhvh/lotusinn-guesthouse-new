@@ -1,3 +1,4 @@
+import SiteImage from '../../components/SiteImage';
 import Head from 'next/head';
 import { useState } from 'react';
 
@@ -35,7 +36,7 @@ export default function AdminLogin() {
       <main className="admin-login-page">
         <div className="admin-login-card">
           <div className="admin-login-brand">
-            <img src="/images/LotusInnLogo.png" alt="Lotus Inn Guest House" onError={(e) => { e.currentTarget.src = '/images/lotusinn-logo.png'; }} />
+            <SiteImage src="/images/LotusInnLogo.png" alt="Lotus Inn Guest House" onError={(e) => { e.currentTarget.src = '/images/lotusinn-logo.png'; }} />
             <span>LOTUS INN GUEST HOUSE</span>
           </div>
           <span className="admin-login-eyebrow">SECURE ADMIN ACCESS</span>

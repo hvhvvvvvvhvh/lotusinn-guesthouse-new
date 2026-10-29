@@ -1,3 +1,4 @@
+import SiteImage from '../../components/SiteImage';
 import { requireAdminPage } from '../../lib/adminAuth.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
@@ -27,7 +28,7 @@ const emptyForm = {
   desc:''
 };
 
-const defaultImage = 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85';
+const defaultImage = '/images/DSC_0271.JPG';
 const defaultIcons = [
   { icon:'fa-solid fa-wifi', label:'Free Wi-Fi' },
   { icon:'fa-solid fa-snowflake', label:'Air Conditioning' },
@@ -237,7 +238,7 @@ export default function RoomsAdmin({ initialData }) {
           </form>
 
           <div className="admin-preview-card">
-            <div className="image-box"><img src={previewCard.image} alt={previewCard.title} /><span className="tag">{previewCard.tag}</span><span className={`availability-tag ${String(previewCard.availability).toLowerCase()}`}>{previewCard.availability}</span></div>
+            <div className="image-box"><SiteImage src={previewCard.image} alt={previewCard.title} /><span className="tag">{previewCard.tag}</span><span className={`availability-tag ${String(previewCard.availability).toLowerCase()}`}>{previewCard.availability}</span></div>
             <div className="content">
               <h3>{previewCard.title}</h3>
               <p className="admin-room-number-preview">Room No: {previewCard.roomNumber}</p>

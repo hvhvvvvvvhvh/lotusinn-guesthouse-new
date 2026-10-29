@@ -1,3 +1,4 @@
+import SiteImage from '../../../components/SiteImage';
 import { adminBlogSummary } from '../../../lib/adminContent.js';
 import { requireAdminPage } from '../../../lib/adminAuth.js';
 import Link from 'next/link';
@@ -51,7 +52,7 @@ export default function BlogsAdmin({ initialBlogs, authors }) {
           <table className="content-table"><thead><tr><th>Post</th><th>Author</th><th>Category</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>
             {filtered.length ? filtered.map((blog) => (
               <tr key={blog.id}>
-                <td><div className="post-cell">{blog.featuredImage ? <img src={blog.featuredImage} alt="" /> : <div className="post-placeholder">L</div>}<div><strong>{blog.title}</strong><small>/{blog.slug}</small></div></div></td>
+                <td><div className="post-cell">{blog.featuredImage ? <SiteImage src={blog.featuredImage} alt="" /> : <div className="post-placeholder">L</div>}<div><strong>{blog.title}</strong><small>/{blog.slug}</small></div></div></td>
                 <td>{authorMap[blog.authorId] || 'Unassigned'}</td><td>{blog.category}</td><td>{blog.publishDate}</td>
                 <td><span className={`content-status ${blog.status.toLowerCase()}`}>{blog.status}</span></td>
                 <td><div className="row-actions"><Link href={`/admin/blogs/edit?id=${blog.id}`}>Edit</Link><Link href={`/blog/${blog.slug}`} target="_blank">View</Link><button onClick={() => removeBlog(blog.id)}>Delete</button></div></td>

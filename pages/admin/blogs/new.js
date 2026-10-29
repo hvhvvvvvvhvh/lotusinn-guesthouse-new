@@ -1,3 +1,4 @@
+import SiteImage from '../../../components/SiteImage';
 import { useRouter } from 'next/router';
 import { uploadImage } from '../../../lib/imageUpload.js';
 import { requireAdminPage } from '../../../lib/adminAuth.js';
@@ -155,7 +156,7 @@ export default function NewBlog({ authors, initialBlog }) {
           <div className="upload-zone">
             <div className="upload-zone-head"><strong></strong><span></span></div>
             <label className="image-upload-button">Choose Featured Image<input type="file" accept="image/*" onChange={(e) => chooseFeaturedImage(e.target.files?.[0])} /></label>
-            {form.featuredImage && <img src={form.featuredImage} alt="Featured preview" />}
+            {form.featuredImage && <SiteImage src={form.featuredImage} alt="Featured preview" />}
           </div>
         </div>
       </section>
@@ -185,7 +186,7 @@ function BlockEditor({ block, index, update, remove, move, chooseImage }) {
     {block.type === 'image' && <div className="image-block-editor">
       <div className="content-form-grid"><Field label="Image URL"><input value={block.url} onChange={e => common({ url:e.target.value })} placeholder="/images/blogs/example.jpg or uploaded image" /></Field><Field label="Alt Text"><input value={block.alt} onChange={e => common({ alt:e.target.value })} placeholder="Describe the image for SEO and accessibility" /></Field></div>
       <div className="inline-image-upload"><label className="image-upload-button">Upload / Choose Image<input type="file" accept="image/*" onChange={e => chooseImage(block.id, e.target.files?.[0])} /></label><span>Upload an image for this content block</span></div>
-      {block.url && <div className="content-image-preview"><img src={block.url} alt={block.alt || 'Content preview'} /><button type="button" onClick={() => common({ url:'' })}>Remove image</button></div>}
+      {block.url && <div className="content-image-preview"><SiteImage src={block.url} alt={block.alt || 'Content preview'} /><button type="button" onClick={() => common({ url:'' })}>Remove image</button></div>}
     </div>}
     {block.type === 'faq' && <div className="content-form-grid"><Field label="Question"><input value={block.question} onChange={e => common({ question:e.target.value })} placeholder="Frequently asked question" /></Field><Field full label="Answer"><textarea value={block.answer} onChange={e => common({ answer:e.target.value })} placeholder="Helpful answer for your reader" /></Field></div>}
   </div>;

@@ -1,3 +1,4 @@
+import SiteImage from '../../components/SiteImage';
 import { requireAdminPage } from '../../lib/adminAuth.js';
 import { useMemo, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
@@ -122,7 +123,7 @@ export default function RoomAvailability({ initialRoomsData, initialBookings }) 
           <div className="availability-grid">
             {filteredRooms.map((room) => (
               <div className="availability-room-card" key={room.slug}>
-                <img src={room.image} alt={room.title} />
+                <SiteImage src={room.image} alt={room.title} />
                 <div className="availability-room-body">
                   <div className="availability-room-head">
                     <div>
