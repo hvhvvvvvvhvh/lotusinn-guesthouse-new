@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import SiteImage, { optimizedImageUrl } from './SiteImage';
 
 export default function Layout({ children, initialLayout, images }) {
+  const { pathname } = useRouter();
   const [siteData, setSiteData] = useState(() => initialLayout ? { layout: initialLayout } : null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -19,6 +21,8 @@ export default function Layout({ children, initialLayout, images }) {
 
   const header = siteData?.layout?.header;
   const footer = siteData?.layout?.footer;
+  const banner = pathname === '/contact' ? images?.contactHero : pathname === '/book-now' ? images?.bookingHero : images?.hero;
+  const hasBanner = !pathname.startsWith('/blog') && !pathname.startsWith('/authors');
 
   return (
     <div className="site-shell" style={images ? {
@@ -26,7 +30,7 @@ export default function Layout({ children, initialLayout, images }) {
       '--booking-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.bookingHero))})`,
       '--contact-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.contactHero))})`,
     } : undefined}>
-      {images && <Head><link rel="preload" as="image" href={optimizedImageUrl(images.hero)} /></Head>}
+      {banner && hasBanner && <Head><link rel="preload" as="image" href={optimizedImageUrl(banner)} /></Head>}
       <header className="header">
         <div className="nav">
           <h2 className="logo">

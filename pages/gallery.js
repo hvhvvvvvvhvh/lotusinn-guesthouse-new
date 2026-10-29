@@ -1,6 +1,6 @@
 import SiteImage from '../components/SiteImage';
 import { publicPage } from '../lib/publicPage.js';
-export async function getServerSideProps(context) { return publicPage(context, 'site'); }
+export async function getStaticProps(context) { return publicPage(context, 'site'); }
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 

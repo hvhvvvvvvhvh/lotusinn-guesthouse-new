@@ -1,16 +1,16 @@
+export async function getStaticPaths() { return { paths: [], fallback: 'blocking' }; }
 import { publicPage } from '../../lib/publicPage.js';
 import SiteImage from '../../components/SiteImage';
 import Link from 'next/link';
-import { getAuthors, getBlogs } from '../../lib/blogStore';
+import { getPublicAuthors as getAuthors, getPublicBlogs as getBlogs } from '../../lib/publicBlogStore.js';
 import { publicAuthor } from '../../lib/publicContent.js';
 
-export async function getServerSideProps(context) {
+export async function getStaticProps(context) {
   const { params } = context;
-  const page = await publicPage(context);
-  const [authors, blogs] = await Promise.all([getAuthors(), getBlogs()]);
+  const [page, authors, blogs] = await Promise.all([publicPage(context), getAuthors(), getBlogs()]);
   const author = authors.find((item) => item.slug === params.slug);
-  if (!author) return { notFound: true };
-  return { props: { siteLayout: page.props.siteLayout, siteImages: page.props.siteImages, author: publicAuthor(author), blogs: blogs.filter((blog) => blog.authorId === author.id && blog.status === 'Published').map(blog => ({ id: blog.id, title: blog.title, slug: blog.slug })) } };
+  if (!author) return { notFound: true, revalidate: 60 };
+  return { revalidate: 60, props: { siteLayout: page.props.siteLayout, siteImages: page.props.siteImages, author: publicAuthor(author), blogs: blogs.filter((blog) => blog.authorId === author.id && blog.status === 'Published').map(blog => ({ id: blog.id, title: blog.title, slug: blog.slug })) } };
 }
 
 export default function AuthorPage({ author, blogs }) {

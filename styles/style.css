@@ -1,4 +1,4 @@
-body{margin:0;font-family:Poppins;background:#f5f3ef}
+body{margin:0;font-family:Poppins,Arial,sans-serif;background:#f5f3ef}
 /* header */
 .header{position: fixed;top: 0;left: 0;width: 100%;z-index: 50;background: rgba(255, 255, 255, 0.78);backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);border-bottom: 1px solid rgba(255, 255, 255, 0.35);box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);}

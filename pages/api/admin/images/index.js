@@ -1,3 +1,4 @@
+import { invalidatePublicContent } from '../../../../lib/publicStore.js';
 import { requireAdminApi } from '../../../../lib/adminAuth.js';
 import { filePaths, readJson, updateJson } from '../../../../lib/dataStore.js';
 import { imageSlots, setImageSlot, withImageDefaults } from '../../../../lib/imageSlots.js';
@@ -29,6 +30,7 @@ export default async function handler(req, res) {
       }
       return setImageSlot(document, slot.path, value);
     });
+    await invalidatePublicContent(slot.dataset, res);
     return res.status(200).json({ success: true, value, expectedHash: imageHash(value) });
   } catch (error) { return apiError(res, error, 'Unable to update website images.'); }
 }

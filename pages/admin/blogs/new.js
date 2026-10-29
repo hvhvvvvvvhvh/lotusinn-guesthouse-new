@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import { uploadImage } from '../../../lib/imageUpload.js';
 import { requireAdminPage } from '../../../lib/adminAuth.js';
 import { useState } from 'react';
@@ -21,7 +22,7 @@ export async function getServerSideProps(context) {
   if (denied) return denied;
 
 
-  return { props: { authors: await getAuthors() } };
+  return { props: { authors: (await getAuthors()).map(author => ({ id: author.id, name: author.name })) } };
 }
 
 function makeSlug(value = '') {
@@ -31,6 +32,7 @@ function makeSlug(value = '') {
 const readImage = uploadImage;
 
 export default function NewBlog({ authors, initialBlog }) {
+  const router = useRouter();
   const [form, setForm] = useState(() => initialBlog ? { ...blank, ...initialBlog } : blank);
   const [blocks, setBlocks] = useState(() => initialBlog?.blocks?.length
     ? initialBlog.blocks.map((b, i) => ({ ...newBlock(b.type), ...b, id: b.id || `block-${i}` }))
@@ -108,7 +110,7 @@ export default function NewBlog({ authors, initialBlog }) {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || `Blog could not be saved (${res.status}).`);
       setNotice({ type: 'success', message: payload.status === 'Published' ? 'Blog published successfully.' : 'Blog saved successfully.' });
-      setTimeout(() => { window.location.href = '/admin/blogs'; }, 650);
+      await router.push('/admin/blogs');
     } catch (error) {
       setNotice({ type: 'error', message: error.message || 'Unable to save blog. Please try again.' });
     } finally {

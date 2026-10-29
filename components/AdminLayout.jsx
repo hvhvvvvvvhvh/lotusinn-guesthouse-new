@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import SiteImage from './SiteImage';
 
 const navItems = [
   { href: "/admin/images", label: "Website Images", icon: "fa-solid fa-images" },
@@ -30,7 +31,7 @@ export default function AdminLayout({ children, title, contentSection = false })
       {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-brand">
-          <img
+          <SiteImage loading="eager" sizes="160px"
             src="/images/LotusInnLogo.png"
             alt="Lotus Inn"
             onError={(e) => {
@@ -44,11 +45,12 @@ export default function AdminLayout({ children, title, contentSection = false })
           </div>
         </div>
 
-        <nav className="admin-nav">
+        <nav className="admin-nav" id="admin-navigation" aria-label="Admin navigation">
           {navItems.filter(item => `${item.label} ${item.href}`.toLowerCase().includes(pageSearch.trim().toLowerCase())).map((item) => (
             <Link
               key={item.href}
               href={item.href}
+              aria-current={activeHref === item.href ? 'page' : undefined}
               className={activeHref === item.href ? "active" : ""}
             >
               <i className={item.icon}></i>
@@ -56,6 +58,7 @@ export default function AdminLayout({ children, title, contentSection = false })
             </Link>
           ))}
         </nav>
+        {pageSearch && <button type="button" className="admin-clear-search" onClick={() => setPageSearch('')}>Show all admin pages</button>}
       </aside>
 
       {/* Main */}

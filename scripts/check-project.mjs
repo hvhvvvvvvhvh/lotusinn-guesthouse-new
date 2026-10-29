@@ -43,12 +43,24 @@ try {
     try { await fetch(base + '/admin/login'); break; } catch { if (attempt === 99) throw new Error('Server did not start.'); await delay(200); }
   }
   for (const route of ['/', '/about', '/rooms', '/room/deluxe', '/room/family', '/room/standard', '/amenities', '/gallery', '/contact', '/book-now', '/blog', '/admin/login']) await request(route);
+  const initialPage = await request('/');
+  const initialHtml = await initialPage.text();
+  assert.match(initialPage.headers.get('cache-control'), /s-maxage=60/);
+  assert.doesNotMatch(initialHtml, /fonts\.googleapis\.com|fonts\.gstatic\.com|cdnjs\.cloudflare\.com/);
+  const stylesheet = /href="([^"\s]+\.css)"/.exec(initialHtml)?.[1];
+  assert.ok(stylesheet);
+  const css = await (await request(stylesheet)).text();
+  const font = /url\(["']?([^\s)"']+\.woff2)/.exec(css)?.[1];
+  assert.ok(font, 'Website font files must be bundled locally.');
+  const fontPath = new URL(font, base + stylesheet).pathname;
+  await request(fontPath);
   for (const route of ['/room/missing-room', '/blog/missing-blog', '/authors/missing-author']) await request(route, { status: 404 });
   const adminPages = ['/admin', '/admin/rooms', '/admin/availability', '/admin/bookings', '/admin/expenses', '/admin/messages', '/admin/amenities', '/admin/blogs', '/admin/blogs/new', '/admin/authors', '/admin/authors/new'];
   for (const route of adminPages) await request(route, { status: 307 });
   await request('/admin/images', { status: 307 });
   await request('/api/admin/images', { status: 401 });
   await request('/api/admin/images/upload', { method: 'POST', status: 401 });
+  await request('/api/admin/media?blog=missing', { status: 401 });
   for (const name of ['bookings', 'messages', 'expenses', 'rooms', 'authors', 'blogs']) await request(`/api/admin/${name}`, { status: 401 });
   await request('/api/admin/bookings', { status: 401, headers: { 'x-middleware-subrequest': 'middleware:middleware:middleware:middleware:middleware' } });
   await request('/api/bookings', { status: 405 });
@@ -99,6 +111,7 @@ try {
   const legacyRooms = JSON.parse(await fs.readFile(roomFile, 'utf8'));
   legacyRooms.roomDetails.deluxe.images[0] = 'data:image/png;base64,' + photo.toString('base64');
   await fs.writeFile(roomFile, JSON.stringify(legacyRooms));
+  await request('/api/admin/rooms', { method: 'POST', admin: true, body: legacyRooms });
   const publicRooms = await (await request('/api/site-data?dataset=rooms')).json();
   assert.match(publicRooms.roomDetails.deluxe.images[0], /^\/api\/media\?/);
   assert.ok(!(await (await request('/room/deluxe')).text()).includes('data:image/png;base64,'));
@@ -167,6 +180,12 @@ try {
   // The editors embed images in JSON. Verify a body above Next's default 1 MB.
   await request('/api/admin/blogs', { method: 'POST', admin: true, body: { ...article, id: blog.id, featuredImage: 'data:image/png;base64,' + 'a'.repeat(1100000) } });
   await request(`/api/media?blog=${blog.id}`, { status: 404 });
+  const privatePreview = await request(`/api/admin/media?blog=${blog.id}`, { admin: true });
+  assert.equal(privatePreview.headers.get('cache-control'), 'no-store');
+  const authorList = await (await request('/admin/authors', { admin: true })).text();
+  const blogList = await (await request('/admin/blogs', { admin: true })).text();
+  assert.ok(authorList.length < 100000, 'Author lists should contain counts, not full articles or embedded photos.');
+  assert.ok(blogList.length < 100000, 'Blog lists should contain summaries, not article bodies or embedded photos.');
   await request('/api/admin/blogs', { method: 'POST', admin: true, body: { ...article, id: blog.id, status: 'Published', featuredImage: 'data:image/png;base64,' + 'a'.repeat(1100000) } });
   const image = await request(`/api/media?blog=${blog.id}`);
   assert.equal(image.headers.get('content-type'), 'image/png');
@@ -174,7 +193,9 @@ try {
   const homepage = await (await request('/')).text();
   assert.ok(homepage.length < 100000, 'Home page must not inline uploaded images or full article bodies.');
   await request('/api/admin/blogs', { method: 'DELETE', admin: true, body: { id: blog.id } });
+  await request(`/blog/${blog.slug}`, { status: 404 });
   await request('/api/admin/authors', { method: 'DELETE', admin: true, body: { id: author.id } });
+  await request(`/authors/${author.slug}`, { status: 404 });
   await request('/api/admin/logout', { method: 'POST', admin: true });
   console.log(`Passed ${checks} integration checks: routes, authentication, guest submissions, concurrent writes, booking changes, expenses, and blog/author publishing.`);
 } catch (error) {

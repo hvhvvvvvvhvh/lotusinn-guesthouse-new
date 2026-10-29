@@ -1,21 +1,22 @@
+import Link from 'next/link';
 import SiteImage from '../components/SiteImage';
 import { cachePublicPage } from '../lib/publicPage.js';
 import { withImageDefaults } from '../lib/imageSlots.js';
 import { publicDataset } from '../lib/publicDataset.js';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { filePaths, readJson } from '../lib/dataStore';
-import { getBlogs } from '../lib/blogStore';
+import { readPublicJson } from '../lib/publicStore.js';
+import { getPublicBlogs as getBlogs } from '../lib/publicBlogStore.js';
 import { publicBlog } from '../lib/publicContent.js';
 
-export async function getServerSideProps(context) {
-  const [site, rooms, blogs] = await Promise.all([readJson(filePaths.site), readJson(filePaths.rooms), getBlogs()]);
+export async function getStaticProps(context) {
+  const [site, rooms, blogs] = await Promise.all([readPublicJson('site'), readPublicJson('rooms'), getBlogs()]);
   cachePublicPage(context.res);
   const publicSite = publicDataset(withImageDefaults(site), 'site');
   const publicRooms = publicDataset(rooms, 'rooms');
   const seen = new Set();
   const posts = blogs.filter(blog => blog.status === 'Published').sort((a,b) => String(b.publishDate).localeCompare(String(a.publishDate))).filter(blog => { if (seen.has(blog.slug)) return false; seen.add(blog.slug); return true; }).slice(0, 3);
-  return { props: { siteLayout: publicSite.layout, siteImages: publicSite.images, data: { home: { ...publicSite.home,
+  return { revalidate: 60, props: { siteLayout: publicSite.layout, siteImages: publicSite.images, data: { home: { ...publicSite.home,
     rooms: { ...site.home.rooms, cards: publicRooms.roomsPage.availableRooms.slice(0, 3).map(room => ({ image: room.image, title: room.title, price: room.price, link: `/room/${room.slug}`, linkLabel: 'View Details' })) },
     blog: { ...site.home.blog, posts: posts.map(blog => ({ title: blog.title, excerpt: blog.excerpt || '', image: publicBlog(blog).featuredImage || '/images/DSC_0271.JPG', link: `/blog/${blog.slug}`, linkLabel: 'Read More' })) },
   } } } };
@@ -61,7 +62,7 @@ export default function Home({ data }) {
               <SiteImage src={room.image} alt={room.title} />
               <h3>{room.title}</h3>
               <p>{room.price}</p>
-              <a href={room.link}>{room.linkLabel}</a>
+              <Link href={room.link}>{room.linkLabel}</Link>
             </div>
           ))}
         </div>
@@ -130,7 +131,7 @@ export default function Home({ data }) {
               <SiteImage src={post.image} alt={post.title} />
               <h3>{post.title}</h3>
               <p>{post.excerpt}</p>
-              <a href={post.link}>{post.linkLabel}</a>
+              <Link href={post.link}>{post.linkLabel}</Link>
             </div>
           ))}
         </div>
@@ -138,7 +139,7 @@ export default function Home({ data }) {
 
       <section className="cta-section">
         <h2 className="section-title">{home?.cta?.title}</h2>
-        <a href={home?.cta?.href || '/book-now'}>{home?.cta?.label}</a>
+        <Link href={home?.cta?.href || '/book-now'}>{home?.cta?.label}</Link>
       </section>
     </>
   );

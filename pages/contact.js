@@ -1,5 +1,5 @@
 import { publicPage } from '../lib/publicPage.js';
-export async function getServerSideProps(context) { return publicPage(context, 'site'); }
+export async function getStaticProps(context) { return publicPage(context, 'site'); }
 import { useMemo, useRef, useState } from 'react';
 
 const initialForm = {

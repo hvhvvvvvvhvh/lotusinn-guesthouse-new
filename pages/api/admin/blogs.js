@@ -1,3 +1,4 @@
+import { invalidatePublicContent } from '../../../lib/publicStore.js';
 import { requireAdminApi } from '../../../lib/adminAuth.js';
 import { getBlogs, getAuthors, makeId, slugify } from '../../../lib/blogStore';
 import { filePaths, updateJson } from '../../../lib/dataStore.js';
@@ -20,18 +21,23 @@ export default async function handler(req, res) {
       if (fields.featuredImage && !safeUrl(fields.featuredImage, true)) invalid('Use a valid featured image URL.');
       const publication = publishFields(body);
       const blocks = validateBlocks(body.blocks || []);
+      let previousSlug;
       const data = await updateJson(filePaths.blogs, data => {
         const blogs = data?.blogs || [];
         if (blogs.some(item => item.slug === slug && item.id !== id)) throw Object.assign(new Error('That blog slug is already in use.'), { status: 409 });
         const current = blogs.find(item => item.id === id);
+        previousSlug = current?.slug;
         const blog = { ...fields, ...publication, id, title, slug, authorId, blocks, category: fields.category || 'Travel Guide', createdAt: current?.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
         return { blogs: current ? blogs.map(item => item.id === id ? blog : item) : [blog, ...blogs] };
       });
+      await invalidatePublicContent('blogs', res, previousSlug ? [`/blog/${previousSlug}`] : []);
       return res.status(200).json({ success: true, blog: data.blogs.find(item => item.id === id) });
     }
     if (req.method === 'DELETE') {
       const id = text(req.body?.id || req.query?.id, 'Blog id', { required: true });
-      const data = await updateJson(filePaths.blogs, data => ({ blogs: (data?.blogs || []).filter(item => item.id !== id) }));
+      let previousSlug;
+      const data = await updateJson(filePaths.blogs, data => { previousSlug = data?.blogs?.find(item => item.id === id)?.slug; return { blogs: (data?.blogs || []).filter(item => item.id !== id) }; });
+      await invalidatePublicContent('blogs', res, previousSlug ? [`/blog/${previousSlug}`] : []);
       return res.status(200).json({ success: true, blogs: data.blogs });
     }
     res.setHeader('Allow', 'GET, POST, DELETE');

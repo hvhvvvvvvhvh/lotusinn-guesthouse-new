@@ -26,10 +26,10 @@ export async function getServerSideProps(context) {
     const items = bookings.filter(item => String(item.checkIn || '').startsWith(prefix));
     return { label: new Date(Date.UTC(Number(year), index, 1)).toLocaleString('en', { month: 'short', timeZone: 'UTC' }), count: items.length };
   });
-  return { props: { monthly, year, totalRooms, activeBookings, totalMessages, monthlyIncome, publishedBlogs, bookings, messages } };
+  return { props: { monthly, year, totalRooms, activeBookings, totalMessages, monthlyIncome, publishedBlogs, pendingBookings: bookings.filter(item => (item.status || 'Pending') === 'Pending').length, bookings: bookings.slice(0, 5), messages: messages.slice(0, 5) } };
 }
 
-export default function AdminDashboard({ monthly, year, totalRooms, activeBookings, totalMessages, monthlyIncome, publishedBlogs, bookings, messages }) {
+export default function AdminDashboard({ monthly, year, totalRooms, activeBookings, totalMessages, monthlyIncome, publishedBlogs, pendingBookings, bookings, messages }) {
   const recentBookings = bookings.slice(0, 5);
   const recentMessages = messages.slice(0, 5);
   const maximum = Math.max(1, ...monthly.map(item => item.count));
@@ -68,7 +68,7 @@ export default function AdminDashboard({ monthly, year, totalRooms, activeBookin
             <h3 style={{marginTop:0}}>Quick Snapshot</h3>
             <p>Manage rooms, booking flow, and guest communication from one place.</p>
             <div style={{display:'grid',gap:'12px',marginTop:'18px'}}>
-              <div className="admin-room-item"><div className="admin-room-meta"><h4>Bookings Pending</h4><p>Review and confirm upcoming stays</p></div><strong>{bookings.filter(item => (item.status || 'Pending') === 'Pending').length}</strong></div>
+              <div className="admin-room-item"><div className="admin-room-meta"><h4>Bookings Pending</h4><p>Review and confirm upcoming stays</p></div><strong>{pendingBookings}</strong></div>
               <div className="admin-room-item"><div className="admin-room-meta"><h4>Messages Pending</h4><p>Respond to guest questions fast</p></div><strong>{totalMessages}</strong></div>
             </div>
           </div>

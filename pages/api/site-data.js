@@ -1,4 +1,4 @@
-import { filePaths, readJson } from '../../lib/dataStore';
+import { readPublicJson } from '../../lib/publicStore.js';
 import { publicDataset } from '../../lib/publicDataset.js';
 import { withImageDefaults } from '../../lib/imageSlots.js';
 
@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const dataset = req.query.dataset;
   if (!['site', 'rooms'].includes(dataset)) return res.status(400).json({ message: 'Unknown public dataset.' });
   try {
-    const data = await readJson(filePaths[dataset]);
+    const data = await readPublicJson(dataset);
     res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=30');
     return res.status(200).json(publicDataset(dataset === 'site' ? withImageDefaults(data) : data, dataset));
   }

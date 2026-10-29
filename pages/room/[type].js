@@ -1,15 +1,16 @@
+export async function getStaticPaths() { return { paths: [], fallback: 'blocking' }; }
 import SiteImage from '../../components/SiteImage';
 import { publicPage } from '../../lib/publicPage.js';
 import Link from 'next/link';
 
-export async function getServerSideProps(context) {
+export async function getStaticProps(context) {
   const { params } = context;
   const page = await publicPage(context, 'rooms');
   const data = page.props.data;
-  if (!Object.hasOwn(data.roomDetails || {}, params.type)) return { notFound: true };
+  if (!Object.hasOwn(data.roomDetails || {}, params.type)) return { notFound: true, revalidate: 60 };
   const card = data.roomsPage.availableRooms.find(item => item.slug === params.type);
   const detail = data.roomDetails[params.type];
-  return { props: { siteLayout: page.props.siteLayout, siteImages: page.props.siteImages, room: { ...detail, ...(card ? { price: card.price, availability: card.availability || 'Available' } : {}) }, type: params.type, bookingBenefits: data.bookingBenefits || [] } };
+  return { revalidate: 60, props: { siteLayout: page.props.siteLayout, siteImages: page.props.siteImages, room: { ...detail, ...(card ? { price: card.price, availability: card.availability || 'Available' } : {}) }, type: params.type, bookingBenefits: data.bookingBenefits || [] } };
 }
 
 const RoomDetail = ({ room, type, bookingBenefits }) => {

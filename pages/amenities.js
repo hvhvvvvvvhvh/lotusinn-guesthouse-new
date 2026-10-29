@@ -1,5 +1,5 @@
 import { publicPage } from '../lib/publicPage.js';
-export async function getServerSideProps(context) { return publicPage(context, 'rooms'); }
+export async function getStaticProps(context) { return publicPage(context, 'rooms'); }
 import Link from 'next/link';
 
 function AmenitiesSection({ title, text, items = [] }) {

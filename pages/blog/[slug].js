@@ -1,22 +1,23 @@
+export async function getStaticPaths() { return { paths: [], fallback: 'blocking' }; }
 import { publicPage } from '../../lib/publicPage.js';
 import SiteImage from '../../components/SiteImage';
 import Head from 'next/head';
 import Link from 'next/link';
-import { getBlogs, getAuthors } from '../../lib/blogStore';
+import { getPublicBlogs as getBlogs, getPublicAuthors as getAuthors } from '../../lib/publicBlogStore.js';
 import { safeUrl } from '../../lib/contentValidation.js';
 import { publicBlog, publicAuthor } from '../../lib/publicContent.js';
 
-export async function getServerSideProps(context) {
+export async function getStaticProps(context) {
   const { params } = context;
-  const page = await publicPage(context);
-  const [blogs, authors] = await Promise.all([getBlogs(), getAuthors()]);
+  const [page, blogs, authors] = await Promise.all([publicPage(context), getBlogs(), getAuthors()]);
   const publishedBlogs = blogs
     .filter((b) => b.status === 'Published')
     .sort((a, b) => String(b.publishDate || '').localeCompare(String(a.publishDate || '')));
   const blog = publishedBlogs.find((b) => b.slug === params.slug);
-  if (!blog) return { notFound: true };
+  if (!blog) return { notFound: true, revalidate: 60 };
 
   return {
+    revalidate: 60,
     props: { siteLayout: page.props.siteLayout, siteImages: page.props.siteImages,
       blog: publicBlog(blog, true),
       author: authors.find((a) => a.id === blog.authorId) ? publicAuthor(authors.find((a) => a.id === blog.authorId)) : null,

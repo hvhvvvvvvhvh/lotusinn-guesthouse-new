@@ -10,7 +10,7 @@ export async function getServerSideProps(context) {
   const [blogs, authors] = await Promise.all([getBlogs(), getAuthors()]);
   const blog = blogs.find((item) => item.id === query.id);
   if (!blog) return { notFound: true };
-  return { props: { authors, initialBlog: blog } };
+  return { props: { authors: authors.map(author => ({ id: author.id, name: author.name })), initialBlog: blog } };
 }
 
 export default function EditBlog({ authors, initialBlog }) {

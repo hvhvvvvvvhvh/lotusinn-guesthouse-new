@@ -1,3 +1,4 @@
+import { adminBlogSummary } from '../../../lib/adminContent.js';
 import { requireAdminPage } from '../../../lib/adminAuth.js';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
@@ -10,7 +11,7 @@ export async function getServerSideProps(context) {
 
 
   const [blogs, authors] = await Promise.all([getBlogs(), getAuthors()]);
-  return { props: { initialBlogs: blogs, authors } };
+  return { props: { initialBlogs: blogs.map(adminBlogSummary), authors: authors.map(author => ({ id: author.id, name: author.name })) } };
 }
 
 export default function BlogsAdmin({ initialBlogs, authors }) {

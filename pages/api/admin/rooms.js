@@ -1,3 +1,4 @@
+import { invalidatePublicContent } from '../../../lib/publicStore.js';
 import { filePaths, readJson, writeJson } from '../../../lib/dataStore';
 import { requireAdminApi } from '../../../lib/adminAuth.js';
 import { apiError, invalid } from '../../../lib/validation.js';
@@ -18,7 +19,9 @@ export default async function handler(req, res) {
       if (slugs.has(room.slug)) invalid('Room slugs must be unique.');
       slugs.add(room.slug);
     }
+    const previous = await readJson(filePaths.rooms);
     await writeJson(filePaths.rooms, req.body);
+    await invalidatePublicContent('rooms', res, previous.roomsPage.availableRooms.map(room => `/room/${room.slug}`));
     return res.status(200).json({ success: true });
   }
   return res.status(405).json({ message: 'Method not allowed' });
