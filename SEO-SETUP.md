@@ -7,6 +7,7 @@ Primary address: https://www.lotusinnguesthouse.com/
 - Server-rendered page titles, descriptions and canonical URLs for public pages.
 - Existing blog and author SEO fields remain authoritative for their own pages.
 - Open Graph and Twitter previews use the selected CMS image.
+- General pages use a 1200×630 branded social card. Room/article/author pages keep their specific CMS photos. Browser favicons, Apple touch icon and manifest icons are generated from the original logo by `scripts/prepare-branding.mjs` during prebuild/predev. Replace that source file deliberately when rebranding; header logo changes still update the structured business logo.
 - LodgingBusiness, WebSite, WebPage, BreadcrumbList, HotelRoom, BlogPosting and Person JSON-LD where appropriate. Contact information comes from the same CMS fields displayed on the website. No review stars or coordinates are invented.
 - `/sitemap.xml` reads current rooms, published articles and authors, deduplicates URLs and uses real article modification dates. CDN cache expires after 60 seconds. Drafts and admin routes are excluded.
 - `/robots.txt` advertises the sitemap; admin pages and API responses also carry noindex directives. Authentication remains the actual access control.
@@ -16,7 +17,7 @@ Primary address: https://www.lotusinnguesthouse.com/
 
 ## Google Search Console
 
-The primary HTTPS URL-prefix property is being configured under the Google account selected by the owner. Its Google-issued verification meta tag is public by design; keep it in `components/Seo.jsx` to retain verification. It is not an authentication secret. Submit `https://www.lotusinnguesthouse.com/sitemap.xml` after deployment, and inspect the homepage and room URLs. Verification/indexing status must be checked in Search Console; deployment alone does not mean Google has indexed the site.
+The primary HTTPS URL-prefix property was verified under the Google account selected by the owner on 30 October 2026. Google processed `https://www.lotusinnguesthouse.com/sitemap.xml` successfully and discovered 18 pages. The homepage was already indexed and a recrawl was requested. Its Google-issued verification meta tag is public by design; keep it in `components/Seo.jsx` to retain verification. It is not an authentication secret. Current indexing status must be checked in Search Console; deployment alone does not mean Google has indexed every page.
 
 ## Existing Google Business Profile
 

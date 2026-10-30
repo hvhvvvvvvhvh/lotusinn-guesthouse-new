@@ -51,6 +51,13 @@ try {
   assert.match(initialHtml, /rel="canonical" href="https:\/\/www.lotusinnguesthouse.com\/"/);
   const seoGraph = JSON.parse(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/.exec(initialHtml)[1])['@graph'];
   assert.ok(seoGraph.some(node => node['@type'] === 'LodgingBusiness'));
+  assert.match(initialHtml, /rel="icon" href="\/favicon-96x96.png"/);
+  assert.match(initialHtml, /rel="apple-touch-icon" href="\/apple-touch-icon.png"/);
+  assert.match(initialHtml, /rel="manifest" href="\/site.webmanifest"/);
+  assert.match(initialHtml, /property="og:image" content="https:\/\/www.lotusinnguesthouse.com\/branding\/social-preview.png"/);
+  assert.match(initialHtml, /name="twitter:image:alt"/);
+  assert.doesNotMatch(initialHtml.match(/<footer\b[\s\S]*?<\/footer>/)?.[0] || '', /href="https:\/\/x.com\/"/);
+  for (const asset of ['/favicon.ico', '/favicon-96x96.png', '/apple-touch-icon.png', '/branding/icon-192.png', '/branding/icon-512.png', '/branding/social-preview.png', '/site.webmanifest']) await request(asset);
   const sitemapResponse = await request('/sitemap.xml');
   assert.match(sitemapResponse.headers.get('content-type'), /application\/xml/);
   const sitemap = await sitemapResponse.text();

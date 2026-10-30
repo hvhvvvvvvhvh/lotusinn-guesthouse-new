@@ -1,8 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { prepareBranding } from './prepare-branding.mjs';
 const require = createRequire(import.meta.url);
 const postcss = require('postcss');
+await prepareBranding();
 
 await fs.mkdir('public/fonts', { recursive: true });
 const faces = [];

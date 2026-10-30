@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import SiteImage, { optimizedImageUrl } from './SiteImage';
 import styles from '../styles/public.module.css';
+import { isSocialProfileUrl } from '../lib/seo.js';
 
 export default function Layout({ children, initialLayout, images }) {
   const { pathname } = useRouter();
@@ -125,13 +126,13 @@ export default function Layout({ children, initialLayout, images }) {
           <div>
             <h4>Follow Us</h4>
             <div className="socials">
-              {(footer?.socials || []).map((item, index) => (
+              {(footer?.socials || []).filter(item => isSocialProfileUrl(item.href)).map((item, index) => (
                 <a
                   key={index}
                   href={item.href}
                   target="_blank"
                   rel="noreferrer"
-                  aria-label={`Social link ${index + 1}`}
+                  aria-label={/facebook/.test(item.href) ? 'Lotus Inn on Facebook' : /instagram/.test(item.href) ? 'Lotus Inn on Instagram' : /wa.me|whatsapp/.test(item.href) ? 'Contact Lotus Inn on WhatsApp' : /x.com|twitter.com/.test(item.href) ? 'Lotus Inn on X' : `Social profile ${index + 1}`}
                 >
                   <i className={item.icon}></i>
                 </a>
