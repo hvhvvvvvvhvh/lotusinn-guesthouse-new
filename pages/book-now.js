@@ -1,3 +1,7 @@
+import Link from 'next/link';
+import { PageHeading } from '../components/PublicPage';
+import s from '../styles/PublicPages.module.css';
+import f from '../styles/FormPages.module.css';
 import { withImageDefaults } from '../lib/imageSlots.js';
 import { publicDataset } from '../lib/publicDataset.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -190,47 +194,11 @@ export default function BookNow({ bookingData }) {
     await sendViaWhatsApp();
   };
 
-  return (
-    <>
-      <section className="hero room-hero page-hero-common">
-        <div className="hero-content booking-hero-content">
-            <span className="booking-kicker">{data?.hero?.kicker}</span>
-            <h1>{data?.hero?.title}</h1>
-            <p>{data?.hero?.subtitle}</p>
-        </div>
-        <div className="bg_overlay"></div>
-      </section>
-
-      <section className="booking-page">
-        <div className="booking-shell">
-          <div className="booking-main-card">
-            <div className="booking-copy">
-              <span className="booking-mini-title">{data?.intro?.label}</span>
-              <h2>{data?.intro?.title}</h2>
-              <p>{data?.intro?.text}</p>
-
-              <div className="booking-feature-list">
-                {(data?.highlights || []).map((item, index) => (
-                  <div className="booking-feature-item" key={index}>
-                    <div className="booking-icon-wrap">
-                      <i className={item.icon}></i>
-                    </div>
-                    <div>
-                      <h4>{item.title}</h4>
-                      <p>{item.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="booking-form-card">
-              <div className="booking-form-head">
-                <h3>{data?.form?.title}</h3>
-                <p>{data?.form?.subtitle}</p>
-              </div>
-
-              <form className="booking-form-grid" onSubmit={handleSubmit}>
+  return <main className={s.page}><div className={f.formPage}>
+    <PageHeading eyebrow="Book your stay" title={data.hero?.title || 'Plan your stay in Mirpur.'} text="Choose your room and dates, then send your request. Our team will help with the rest."/>
+    <div className={`${s.wrap} ${s.section} ${f.layout}`}>
+      <section className={f.formCard} aria-labelledby="booking-form-title"><p className={s.eyebrow}>YOUR NEXT STAY</p><h2 id="booking-form-title">Your stay details</h2><p className={f.formIntro}>Enter your dates and contact details below.</p>
+      <form className="booking-form-grid" onSubmit={handleSubmit}>
                 <div className="booking-field">
                   <label htmlFor="checkIn">Check In</label>
                   <input type="date" id="checkIn" name="checkIn" value={form.checkIn} onChange={handleChange} required />
@@ -279,12 +247,12 @@ export default function BookNow({ bookingData }) {
                 </div>
 
                 <div className="booking-field booking-field-full">
-                  <label htmlFor="notes">Special Requests</label>
+                  <label htmlFor="notes">Special requests (optional)</label>
                   <textarea id="notes" name="notes" value={form.notes} onChange={handleChange} rows="4" placeholder="Airport pickup, early check-in, extra bed, etc."></textarea>
                 </div>
 
                 {status.message ? (
-                  <div className={`booking-status booking-status-${status.type || 'info'}`}>
+                  <div role="status" className={`booking-status booking-status-${status.type || 'info'}`}>
                     {status.message}
                   </div>
                 ) : null}
@@ -302,83 +270,11 @@ export default function BookNow({ bookingData }) {
                 </div>
 
                 <p className="booking-disclaimer booking-field-full">
-                  Your booking details will open directly in WhatsApp or your email app for quick sending.
+                  Send your request to our team. Your stay is confirmed once availability has been checked.
                 </p>
               </form>
-            </div>
-          </div>
-
-          <div className="booking-bottom-grid">
-            <div className="booking-pricing-card">
-              <div className="booking-section-head">
-                <span>{data?.pricing?.label}</span>
-                <h3>{data?.pricing?.title}</h3>
-              </div>
-
-              <div className="booking-rate-grid">
-                {prefilledRoom?.title && !(data?.pricingCards || []).some((item) => item.title === prefilledRoom.title) ? (
-                  <div className="booking-rate-item active">
-                    <div>
-                      <h4>{prefilledRoom.title}</h4>
-                      <p>{prefilledRoom.tag ? `${prefilledRoom.tag} selected from rooms page.` : 'Selected from rooms page.'}</p>
-                    </div>
-                    <strong>{prefilledRoom.price}</strong>
-                  </div>
-                ) : null}
-                {(data?.pricingCards || []).map((item, index) => (
-                  <div className={`booking-rate-item ${selectedRoom?.title === item.title ? 'active' : ''}`} key={index}>
-                    <div>
-                      <h4>{item.title}</h4>
-                      <p>{item.text}</p>
-                    </div>
-                    <strong>{item.price}</strong>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="booking-side-stack">
-              <div className="booking-info-panel">
-                <div className="booking-section-head">
-                  <span>{data?.whyChoose?.label}</span>
-                  <h3>{data?.whyChoose?.title}</h3>
-                </div>
-                <div className="booking-badges">
-                  {(data?.whyChoose?.items || []).map((item, index) => (
-                    <div className="booking-badge" key={index}>
-                      <i className={item.icon}></i>
-                      <span>{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="booking-contact-panel">
-                <h3>{data?.contactCard?.title}</h3>
-                <p>{data?.contactCard?.text}</p>
-                <div className="booking-contact-list">
-                  {(data?.contactCard?.items || []).map((item, index) => (
-                    <div className="booking-contact-item" key={index}>
-                      <i className={item.icon}></i>
-                      <span>{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="booking-contact-actions">
-                  <a href={`https://wa.me/${contactValues.whatsappNumber}`} target="_blank" rel="noreferrer" className="booking-contact-link">
-                    <i className="fa-brands fa-whatsapp"></i>
-                    <span>Chat on WhatsApp</span>
-                  </a>
-                  <a href={`mailto:${contactValues.emailRecipient}`} className="booking-contact-link booking-contact-link-outline">
-                    <i className="fa-solid fa-envelope"></i>
-                    <span>Email Us</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
-    </>
-  );
+      <aside className={f.sideCard} aria-label="Your selected room"><p className={s.eyebrow}>YOUR ROOM</p><h2>{selectedRoom?.title || 'Stay at Lotus Inn'}</h2><p className={f.price}>{selectedRoom?.price}</p><p>{selectedRoom?.text}</p><div className={f.divider}/><h3>A simple way to book</h3><ol className={f.steps}><li>Choose your dates and room.</li><li>Send your request by WhatsApp or email.</li><li>Our team confirms availability with you.</li></ol><Link href="/rooms" className={s.textLink}>Compare our rooms <span aria-hidden="true">↗</span></Link><div className={f.divider}/><h3>Need a hand?</h3><p>We’re happy to help you plan your visit.</p><a className={s.outlineButton} href={`https://wa.me/${contactValues.whatsappNumber}`} target="_blank" rel="noreferrer"><i className="fa-brands fa-whatsapp" aria-hidden="true"/>Chat with our team</a><a className={f.phoneLink} href={`tel:${contactValues.phoneDisplay.replace(/[^+\d]/g,'')}`}>{contactValues.phoneDisplay}</a></aside>
+    </div>
+  </div></main>;
 }

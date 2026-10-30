@@ -1,3 +1,5 @@
+import s from '../../styles/PublicPages.module.css';
+import a from '../../styles/Articles.module.css';
 export async function getStaticPaths() { return { paths: [], fallback: 'blocking' }; }
 import { publicPage } from '../../lib/publicPage.js';
 import SiteImage from '../../components/SiteImage';
@@ -36,18 +38,13 @@ export default function BlogDetail({ blog, author, related }) {
   return (
     <>
 
-      <main className="lotus-article-page">
+      <main className={`${s.page} ${a.article}`}>
         <div className="lotus-article-breadcrumbs">
           <Link href="/">Home</Link><span>›</span><Link href="/blog">Blog</Link><span>›</span><span>{blog.category || 'Travel Guide'}</span>
         </div>
 
         <section className="lotus-article-shell">
           <article className="lotus-article-main">
-                        {blog.featuredImage && (
-              <figure className="lotus-article-featured-wrap">
-                <SiteImage loading="eager" fetchPriority="high" className="lotus-article-featured" src={blog.featuredImage} alt={blog.title} />
-              </figure>
-            )}
             <header className="lotus-article-header">
               <div className="lotus-post-meta"><span>{blog.category || 'Travel Guide'}</span><b>•</b><span>{blog.publishDate || ''}</span><b>•</b><span>{minutes} min read</span></div>
               <h1>{blog.title}</h1>
@@ -61,6 +58,12 @@ export default function BlogDetail({ blog, author, related }) {
                 <Link className="lotus-back-blog" href="/blog">All Guides</Link>
               </div>
             </header>
+                        {blog.featuredImage && (
+              <figure className="lotus-article-featured-wrap">
+                <SiteImage loading="eager" fetchPriority="high" className="lotus-article-featured" src={blog.featuredImage} alt={blog.title} />
+              </figure>
+            )}
+
 
 
 
@@ -78,7 +81,7 @@ export default function BlogDetail({ blog, author, related }) {
             <div className="lotus-sidebar-card lotus-sticky-card">
               <div className="lotus-sidebar-title"><span className="lotus-eyebrow">KEEP READING</span><h3>Latest Articles</h3></div>
               <div className="lotus-sidebar-list">
-                {related.map((item) => (
+                {related.slice(0,3).map((item) => (
                   <Link href={`/blog/${item.slug}`} key={item.id} className="lotus-sidebar-item">
                     {item.featuredImage ? <SiteImage src={item.featuredImage} alt="" /> : <div className="lotus-sidebar-fallback">L</div>}
                     <div><strong>{item.title}</strong><small>{item.publishDate}</small></div>

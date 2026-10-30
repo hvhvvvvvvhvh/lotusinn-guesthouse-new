@@ -1,76 +1,31 @@
+import { useEffect, useRef, useState } from 'react';
 import SiteImage from '../components/SiteImage';
 import { publicPage } from '../lib/publicPage.js';
+import { PageHeading, PageCTA } from '../components/PublicPage';
+import s from '../styles/PublicPages.module.css';
 export async function getStaticProps(context) { return publicPage(context, 'site'); }
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-
-export default function Gallery({ data: initialData }) {
-  const data = initialData;
+export default function Gallery({ data }) {
+  const page = data.galleryPage;
   const [filter, setFilter] = useState('all');
   const [popup, setPopup] = useState(null);
+  const dialog = useRef(null);
+  const images = (page.images || []).filter(image => filter === 'all' || image.category === filter);
   useEffect(() => {
-    if (!popup) return;
-    const close = event => { if (event.key === 'Escape') setPopup(null); };
-    window.addEventListener('keydown', close);
-    return () => window.removeEventListener('keydown', close);
+    const node = dialog.current;
+    if (!popup) { if (node?.open) node.close(); return; }
+    if (!node.open) node.showModal();
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
   }, [popup]);
-
-
-  const galleryPage = data?.galleryPage;
-
-  const filteredImages = useMemo(() => {
-    const images = galleryPage?.images || [];
-    return filter === 'all' ? images : images.filter((img) => img.category === filter);
-  }, [galleryPage, filter]);
-
-  return (
-    <section className="gallery-page">
-      <section className="hero room-hero">
-        <div className="hero-content">
-          <h1>{galleryPage?.hero?.title}</h1>
-          <p>{galleryPage?.hero?.subtitle}</p>
-        </div>
-        <div className="bg_overlay"></div>
-      </section>
-
-      <div className="filters">
-        {(galleryPage?.filters || []).map((item) => (
-          <button key={item.value} className={filter === item.value ? 'active' : ''} aria-pressed={filter === item.value} onClick={() => setFilter(item.value)}>
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="gallery-grid">
-        {filteredImages.map((img, index) => (
-          <div className="gallery-item" key={index} role="button" tabIndex={0} aria-label={`Open gallery image ${index + 1}`} onClick={() => setPopup(img.src)} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setPopup(img.src); } }}>
-            <SiteImage src={img.src} alt="Gallery" />
-            <div className="hover">
-              <i className="fa-solid fa-magnifying-glass"></i>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {popup && (
-        <div className="popup" onClick={() => setPopup(null)}>
-          <SiteImage src={popup} alt="Popup" />
-        </div>
-      )}
-
-      <div className="gallery-stats">
-        {(galleryPage?.stats || []).map((item, index) => (
-          <div key={index}>
-            <h2>{item.value}</h2>
-            <p>{item.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <section className="cta-section">
-        <h2 className="section-title">{galleryPage?.cta?.title}</h2>
-        <Link href={galleryPage?.cta?.href || '/book-now'}>{galleryPage?.cta?.label}</Link>
-      </section>
+  return <main className={s.page}>
+    <PageHeading eyebrow="The gallery" title={page.hero?.title} text={page.hero?.subtitle}/>
+    <section className={`${s.wrap} ${s.section}`} aria-label="Guest house photographs">
+      <div className={s.galleryTools}><div className={s.tabs} aria-label="Gallery categories">{(page.filters || []).map(item => <button key={item.value} onClick={() => setFilter(item.value)} aria-pressed={filter === item.value}>{item.label}</button>)}</div><p className={s.galleryCount} role="status">{images.length} photographs</p></div>
+      <div className={s.photoGrid}>{images.map((image,i) => <button type="button" key={`${image.src}-${i}`} className={s.galleryButton} aria-label={`Open gallery image ${i+1}`} onClick={() => setPopup(image)}><SiteImage src={image.src} alt={`${image.category || 'Guest house'} at Lotus Inn, view ${i+1}`} sizes={i === 0 ? '(max-width: 760px) 100vw, 66vw' : '(max-width: 760px) 50vw, 33vw'}/><span aria-hidden="true">↗</span></button>)}</div>
+      {!images.length && <div className={s.empty}><h2>No photographs in this category yet.</h2><p>Please choose another category.</p></div>}
     </section>
-  );
+    <dialog ref={dialog} className={s.dialog} aria-label="Gallery image preview" onCancel={e => { e.preventDefault(); setPopup(null); }} onClose={() => setPopup(null)} onClick={e => { if (e.target === e.currentTarget) setPopup(null); }}><div className={s.dialogHead}><span>Lotus Inn Guest House</span><button type="button" autoFocus onClick={() => setPopup(null)}>Close ×</button></div>{popup && <SiteImage src={popup.src} alt={`${popup.category || 'Guest house'} at Lotus Inn`} sizes="100vw"/>}</dialog>
+    <PageCTA title={page.cta?.title} label={page.cta?.label} href={page.cta?.href}/>
+  </main>;
 }

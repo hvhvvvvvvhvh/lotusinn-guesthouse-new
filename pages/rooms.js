@@ -1,214 +1,38 @@
-import SiteImage from '../components/SiteImage';
-import { publicPage } from '../lib/publicPage.js';
-export async function getStaticProps(context) { return publicPage(context, 'rooms'); }
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { publicPage } from '../lib/publicPage.js';
+import { PageHeading, PageCTA, SectionHeading, RoomCard } from '../components/PublicPage';
+import s from '../styles/PublicPages.module.css';
+export async function getStaticProps(context) { return publicPage(context, 'rooms'); }
 
-function bookingHref(room) {
-  const params = new URLSearchParams({
-    room: room.title || room.tag || 'Room',
-    price: room.price || '',
-    slug: room.slug || '',
-    tag: room.tag || ''
+export default function Rooms({ data, siteImages }) {
+  const page = data.roomsPage;
+  const [type, setType] = useState('all');
+  const [price, setPrice] = useState('all');
+  const rooms = useMemo(() => {
+    const seen = new Set();
+    return (page.availableRooms || []).filter(room => { if (seen.has(room.slug)) return false; seen.add(room.slug); return true; });
+  }, [page]);
+  const filtered = rooms.filter(room => {
+    const cost = Number(String(room.price).replace(/[^\d]/g, ''));
+    return (type === 'all' || String(room.tag || room.title).toLowerCase().includes(type.toLowerCase())) && (price === 'all' || (price === 'under' ? cost <= 5000 : price === 'mid' ? cost > 5000 && cost <= 8000 : cost > 8000));
   });
-  return `/book-now?${params.toString()}`;
-}
-
-export default function Rooms({ data: initialData }) {
-  const data = initialData;
-  const [selectedType, setSelectedType] = useState('Room Type');
-  const [selectedPrice, setSelectedPrice] = useState('Price Range');
-  const [searchClicked, setSearchClicked] = useState(false);
-
-
-  const roomsPage = data?.roomsPage;
-
-  const filteredAvailableRooms = useMemo(() => {
-    const rooms = roomsPage?.availableRooms || [];
-
-    return rooms.filter((room) => {
-      const typeMatch =
-        selectedType === 'Room Type' ||
-        room.tag.toLowerCase().includes(selectedType.toLowerCase()) ||
-        room.title.toLowerCase().includes(selectedType.toLowerCase());
-
-      if (!typeMatch) return false;
-
-      if (selectedPrice === 'Price Range') return true;
-
-      const numericPrice = Number(room.price.replace(/[^\d]/g, ''));
-
-      if (selectedPrice === 'Rs 3000 - 5000') {
-        return numericPrice >= 3000 && numericPrice <= 5000;
-      }
-
-      if (selectedPrice === 'Rs 5000 - 8000') {
-        return numericPrice >= 5000 && numericPrice <= 8000;
-      }
-
-      return true;
-    });
-  }, [roomsPage, selectedType, selectedPrice, searchClicked]);
-
-  const renderRoomCard = (room, showIcons = 'badges') => (
-    <div className="room-card" key={room.slug}>
-      <div className="image-box">
-        <SiteImage src={room.image} alt={room.title} />
-        <span className="tag">{room.tag}</span>
-        {room.availability ? (
-          <span className={`availability-tag ${String(room.availability).toLowerCase()}`}>
-            {room.availability}
-          </span>
-        ) : null}
-        <div className="overlay">
-          <Link href={`/room/${room.slug}`}>
-            <button>View Details</button>
-          </Link>
+  const types = [...new Set(rooms.map(room => room.tag).filter(Boolean))];
+  return <main className={s.page}>
+    <PageHeading eyebrow="Our rooms" title={page.hero?.title || 'A room for every kind of stay.'} text="Find your space to unwind in Mirpur. Explore our rooms, compare nightly rates, and send your stay request directly to our team." image={siteImages?.hero || rooms[0]?.image} imageAlt="A welcoming room at Lotus Inn" />
+    <div className={s.wrap}>
+      <section className={s.section} aria-labelledby="room-selection-title">
+        <SectionHeading eyebrow="REST, YOUR WAY" title="Find your room" text={page.masterSubtitle} />
+        <div className={s.filters} aria-label="Filter rooms">
+          <label>Room type<select value={type} onChange={e => setType(e.target.value)}><option value="all">All room types</option>{types.map(value => <option key={value}>{value}</option>)}</select></label>
+          <label>Nightly rate<select value={price} onChange={e => setPrice(e.target.value)}><option value="all">All prices</option><option value="under">Up to Rs 5,000</option><option value="mid">Rs 5,001–8,000</option><option value="over">Above Rs 8,000</option></select></label>
+          <button type="button" className={s.outlineButton} onClick={() => { setType('all'); setPrice('all'); }}>Reset filters</button>
         </div>
-      </div>
-
-      <div className="content">
-        <h3>{room.title}</h3>
-        <p>{room.description || room.text}</p>
-
-        <div className="icons">
-          {showIcons === 'badges'
-            ? (room.badges || []).map((badge, index) => (
-                <span key={index}>
-                  <i className={badge.icon}></i> {badge.label}
-                </span>
-              ))
-            : (room.iconOnly || []).map((icon, index) => <i key={index} className={icon}></i>)}
-        </div>
-
-        <div className="bottom room-card-actions">
-          <h4>{room.price}</h4>
-          <div className="room-action-buttons">
-            <Link href={`/room/${room.slug}`}>
-              <button type="button">View Details</button>
-            </Link>
-            <Link href={bookingHref(room)}>
-              <button type="button" className="book-room-btn">Book Now</button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <section>
-      <div className="rooms-page">
-        <section className="hero room-hero">
-          <div className="hero-content">
-            <h1>{roomsPage?.hero?.title}</h1>
-            <p>{roomsPage?.hero?.subtitle}</p>
-          </div>
-          <div className="bg_overlay"></div>
-        </section>
-
-        <section className="filter-bar">
-          <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
-            {(roomsPage?.filters?.types || []).map((item, index) => (
-              <option key={index}>{item}</option>
-            ))}
-          </select>
-
-          <select value={selectedPrice} onChange={(e) => setSelectedPrice(e.target.value)}>
-            {(roomsPage?.filters?.prices || []).map((item, index) => (
-              <option key={index}>{item}</option>
-            ))}
-          </select>
-
-          <button onClick={() => setSearchClicked((prev) => !prev)}>Search</button>
-        </section>
-
-        <section className="room-section">
-          <h2 className="section-title">{roomsPage?.masterTitle}</h2>
-          <p className="section-sub">{roomsPage?.masterSubtitle}</p>
-          <div className="room-grid">
-            {(roomsPage?.masterRooms || []).map((room) => renderRoomCard(room, 'badges'))}
-          </div>
-        </section>
-
-        <section className="room-section">
-          <h2 style={{ marginBottom: '30px' }} className="section-title">
-            {roomsPage?.availableTitle}
-          </h2>
-          <div className="room-grid">
-            {filteredAvailableRooms.map((room) => renderRoomCard(room, 'icons'))}
-          </div>
-        </section>
-
-        <section className="features">
-          <h2 style={{ marginBottom: '20px' }} className="section-title">
-            {roomsPage?.amenitiesTitle}
-          </h2>
-          <div className="features-grid">
-            {(roomsPage?.amenities || []).map((item, index) => <div key={index}>{item}</div>)}
-          </div>
-        </section>
-
-        <section className="features">
-          <h2 style={{ marginBottom: '20px' }} className="section-title">
-            {roomsPage?.facilitiesTitle}
-          </h2>
-          <div className="features-grid">
-            {(roomsPage?.facilities || []).map((item, index) => (
-              <div key={index}><i className={item.icon}></i> {item.label}</div>
-            ))}
-          </div>
-        </section>
-
-        <section className="amenities-page-section amenities-showcase-section">
-          <div className="amenities-page-head">
-            <h2 className="section-title">{roomsPage?.amenitiesShowcase?.title}</h2>
-            <p className="section-sub">{roomsPage?.amenitiesShowcase?.subtitle}</p>
-          </div>
-          <div className="amenities-cards-grid">
-            {(roomsPage?.amenitiesShowcase?.items || []).map((item, index) => (
-              <div className="amenity-info-card" key={index}>
-                <h3><i className={item.icon}></i> {item.title}</h3>
-                <p>{item.text}</p>
-              </div>
-            ))}
-          </div>
-          <div className="meal-plan-row">
-            {(roomsPage?.amenitiesShowcase?.mealPlans || []).map((item, index) => (
-              <div className="meal-plan-chip" key={index}>
-                <strong>{item.title}</strong>
-                <span>{item.price}</span>
-              </div>
-            ))}
-          </div>
-          <div className="cta-section" style={{ paddingTop: '20px', paddingBottom: '50px' }}>
-            <Link href={roomsPage?.amenitiesShowcase?.buttonHref || '/amenities'}>{roomsPage?.amenitiesShowcase?.buttonLabel || 'View Full Amenities'}</Link>
-          </div>
-        </section>
-
-        <section className="why-rooms">
-          <h2 style={{ marginBottom: '20px' }} className="section-title">{roomsPage?.whyChooseTitle}</h2>
-          <div className="why-grid">
-            {(roomsPage?.whyChoose || []).map((item, index) => (
-              <div key={index}><h3>{item.title}</h3><p>{item.text}</p></div>
-            ))}
-          </div>
-        </section>
-
-        <section className="why">
-          <h2 style={{ marginBottom: '30px' }} className="section-title">{roomsPage?.whyStayTitle}</h2>
-          <div className="why-grid">
-            {(roomsPage?.whyStay || []).map((item, index) => (
-              <div key={index}><i className={item.icon}></i><h3>{item.title}</h3><p>{item.text}</p></div>
-            ))}
-          </div>
-        </section>
-
-        <section className="cta-section">
-          <h2 className="section-title">{roomsPage?.cta?.title}</h2>
-          <Link href={roomsPage?.cta?.href || '/book-now'}>{roomsPage?.cta?.label}</Link>
-        </section>
-      </div>
-    </section>
-  );
+        <div className={s.results}><h3 id="room-selection-title">Our accommodation</h3><p role="status">{filtered.length} {filtered.length === 1 ? 'room type' : 'room types'}</p></div>
+        <div className={s.roomGrid}>{filtered.map(room => <RoomCard key={room.slug} room={room} />)}{!filtered.length && <div className={s.empty}><h3>No rooms match these filters.</h3><p>Try another room type or price range.</p><button className={s.button} onClick={() => { setType('all'); setPrice('all'); }}>Show all rooms</button></div>}</div>
+      </section>
+      <section className={s.featureBand}><div><p className={s.eyebrow}>THE EVERYDAY ESSENTIALS</p><h2>{page.facilitiesTitle || 'Comfort comes included.'}</h2></div><div className={s.featureGrid}>{(page.facilities || []).map((item, i) => <div key={i} className={s.feature}><i className={item.icon} aria-hidden="true" /><span>{item.label}</span></div>)}</div></section>
+      <section className={s.section}><SectionHeading eyebrow="A LITTLE MORE COMFORT" title={page.amenitiesShowcase?.title || 'Thoughtful extras for your stay.'} text={page.amenitiesShowcase?.subtitle}><Link href="/amenities" className={s.textLink}>All amenities <span aria-hidden="true">↗</span></Link></SectionHeading><div className={s.threeGrid}>{(page.amenitiesShowcase?.items || []).slice(0,3).map((item,i) => <article key={i} className={s.infoCard}><i className={item.icon} aria-hidden="true" /><h3>{item.title}</h3><p>{item.text}</p></article>)}</div></section>
+    </div><PageCTA title={page.cta?.title} href={page.cta?.href} label={page.cta?.label || 'Plan your stay'} />
+  </main>;
 }

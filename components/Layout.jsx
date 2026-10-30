@@ -33,17 +33,16 @@ export default function Layout({ children, initialLayout, images }) {
 
   const header = siteData?.layout?.header;
   const footer = siteData?.layout?.footer;
-  const banner = pathname === '/contact' ? images?.contactHero : pathname === '/book-now' ? images?.bookingHero : images?.hero;
-  const hasBanner = !pathname.startsWith('/blog') && !pathname.startsWith('/authors');
+  const banner = images?.hero;
 
   return (
-    <div className={[styles.surface, homeStyles.homeShell, theme.publicSite].join(' ')}><div className="site-shell" style={images ? {
+    <div className={[isHome ? styles.surface : '', homeStyles.homeShell, theme.publicSite].filter(Boolean).join(' ')}><div className="site-shell" style={images ? {
       '--site-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.hero))})`,
       '--booking-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.bookingHero))})`,
       '--contact-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.contactHero))})`,
     } : undefined}>
-      {banner && hasBanner && <Head><link rel="preload" as="image" href={optimizedImageUrl(banner)} imageSrcSet={isHome ? imageSourceSet(banner) : undefined} imageSizes={isHome ? '(max-width: 760px) 100vw, 1400px' : undefined} /></Head>}
-      <header className="header">
+      {banner && isHome && <Head><link rel="preload" as="image" href={optimizedImageUrl(banner)} imageSrcSet={imageSourceSet(banner)} imageSizes="(max-width: 760px) 100vw, 1400px" /></Head>}
+      <div className={!isHome ? `${styles.surface} ${theme.headerFrame}` : undefined}><header className="header">
         <div className="nav">
           <h2 className="logo">
             <Link href="/" onClick={closeMenu}>
@@ -92,9 +91,9 @@ export default function Layout({ children, initialLayout, images }) {
             </Link>
           </nav>
         </div>
-      </header>
+      </header></div>
 
-      <div className={!isHome ? theme.content : undefined}>{children}</div>
+      {children}
 
       <Footer footer={footer} logo={header?.logo} />
     </div></div>

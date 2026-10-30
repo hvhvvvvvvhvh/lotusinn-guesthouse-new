@@ -1,58 +1,14 @@
 import { publicPage } from '../lib/publicPage.js';
+import { PageHeading, PageCTA, SectionHeading } from '../components/PublicPage';
+import s from '../styles/PublicPages.module.css';
 export async function getStaticProps(context) { return publicPage(context, 'rooms'); }
-import Link from 'next/link';
-
-function AmenitiesSection({ title, text, items = [] }) {
-  return (
-    <section className="amenities-page-section">
-      <div className="amenities-page-head">
-        <h2 className="section-title">{title}</h2>
-        <p className="section-sub">{text}</p>
-      </div>
-      <div className="amenities-cards-grid">
-        {items.map((item, index) => (
-          <div className="amenity-info-card" key={index}>
-            <h3>{item.title}</h3>
-            <p>{item.text}</p>
-            {item.price ? <span>{item.price}</span> : null}
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export default function AmenitiesPage({ data: initialData }) {
   const data = initialData.amenitiesPage;
-
-
-  return (
-    <>
-      <section className="hero room-hero">
-        <div className="hero-content">
-          <h1>{data?.hero?.title}</h1>
-          <p>{data?.hero?.subtitle}</p>
-        </div>
-        <div className="bg_overlay"></div>
-      </section>
-
-      <section className="amenities-page-wrap">
-        <div className="amenities-page-intro">
-          <span className="booking-mini-title">{data?.intro?.label}</span>
-          <h2>{data?.intro?.title}</h2>
-          <p>{data?.intro?.text}</p>
-        </div>
-
-        <AmenitiesSection title={data?.essentialTitle} text={data?.essentialText} items={data?.essential} />
-        <AmenitiesSection title={data?.premiumTitle} text={data?.premiumText} items={data?.premium} />
-        <AmenitiesSection title={data?.mealPlansTitle} text={data?.mealPlansText} items={data?.mealPlans} />
-        <AmenitiesSection title={data?.servicesTitle} text={data?.servicesText} items={data?.services} />
-
-        <section className="cta-section">
-          <h2 className="section-title">{data?.cta?.title}</h2>
-          <Link href={data?.cta?.href || '/book-now'}>{data?.cta?.label || 'Book Now'}</Link>
-        </section>
-      </section>
-    </>
-  );
+  const groups = [
+    { title:data.essentialTitle, text:data.essentialText, items:data.essential, label:'IN YOUR ROOM', icon:'fa-solid fa-bed' },
+    { title:data.mealPlansTitle, text:data.mealPlansText, items:data.mealPlans, label:'AT YOUR TABLE', icon:'fa-solid fa-utensils' },
+    { title:data.premiumTitle, text:data.premiumText, items:data.premium, label:'A LITTLE EXTRA', icon:'fa-solid fa-star' },
+    { title:data.servicesTitle, text:data.servicesText, items:data.services, label:'HERE TO HELP', icon:'fa-solid fa-bell' },
+  ];
+  return <main className={s.page}><PageHeading eyebrow="Amenities & services" title={data.hero?.title} text={data.hero?.subtitle}/><div className={s.wrap}>{groups.map(group => <section key={group.label} className={s.section}><SectionHeading eyebrow={group.label} title={group.title} text={group.text}/><div className={s.amenityGrid}>{(group.items || []).map((item,i) => <article className={s.amenityRow} key={i}><i className={group.icon} aria-hidden="true"/><div><h3>{item.title}</h3><p>{item.text}</p></div>{item.price && <span className={s.amenityPrice}>{item.price}</span>}</article>)}</div></section>)}</div><PageCTA title={data.cta?.title} label={data.cta?.label} href={data.cta?.href} text="Let us know what you need when you send your stay request."/></main>;
 }
