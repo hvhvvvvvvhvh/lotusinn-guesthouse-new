@@ -86,6 +86,12 @@ try {
   assert.match(initialHeader || '', /href="\/rooms"/, 'Main navigation must be available before browser data requests.');
   assert.match(initialFooter || '', /href="\/contact"/, 'Footer links must render in the initial page.');
   assert.match(initialHtml, /<link[^>]+rel="preload"[^>]+as="image"/, 'The selected hero must be preloaded.');
+  assert.match(initialHtml, /<link[^>]+as="image"[^>]+imageSrcSet="/i, 'The hero preload must select the same responsive photo as the visible hero.');
+  assert.match(initialHtml, /<main[^>]+id="main-content"/);
+  assert.equal((initialHtml.match(/<h1\b/g) || []).length, 1);
+  assert.match(initialHtml, /aria-label="Find your stay"/);
+  assert.match(initialHtml, /aria-labelledby="rooms-title"/);
+  assert.match(initialHtml, /<h2 id="rooms-title"/);
   const initialImages = [...initialHtml.matchAll(/<img\b[^>]*src="([^"]+)"[^>]*>/g)];
   assert.ok(initialImages.length > 5);
   assert.ok(initialImages.every(image => !image[1].startsWith('/images/')), 'Homepage stock photos must use compressed responsive variants.');
@@ -94,6 +100,11 @@ try {
   const initialProps = JSON.parse(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/.exec(initialHtml)[1]).props.pageProps;
   assert.ok(initialProps.siteLayout?.header?.menu?.length && initialProps.siteImages?.hero, 'Homepage must supply its layout and selected images.');
   assert.ok(!initialProps.data?.about, 'Homepage props should not include every public page.');
+  const iconStyles = await fs.readFile('styles/icons.css', 'utf8');
+  for (const item of initialProps.data.home.amenities.items) {
+    const icon = item.icon.split(' ').find(name => /^fa-/.test(name) && !['fa-solid', 'fa-brands', 'fa-regular'].includes(name));
+    assert.ok(iconStyles.includes('.' + icon + '{'), 'The selected homepage amenity icon must have a generated SVG mask: ' + icon);
+  }
   const homeScript = [...initialHtml.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match => match[1]).find(src => /\/pages\/index-/.test(src));
   assert.ok(homeScript);
   const homeCode = await (await request(homeScript)).text();

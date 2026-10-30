@@ -25,13 +25,14 @@ async function scan(directory) {
 }
 for (const directory of ['components', 'pages', 'public/data', 'data']) await scan(directory);
 const names = new Set([...source.matchAll(/\bfa-([a-z0-9-]+)/g)].map(match => match[1]));
+const iconAliases = { hamburger: 'burger', 'shield-alt': 'shield-halved' };
 const rules = ['/* Font Awesome Free 6.5.1 — Fonticons, Inc. — Icons: CC BY 4.0 https://fontawesome.com/license/free */', '.fa,.fas,.far,.fab,.fa-solid,.fa-regular,.fa-brands{display:inline-block;font-style:normal;line-height:1}',
   '.fa:before,.fas:before,.far:before,.fab:before,.fa-solid:before,.fa-regular:before,.fa-brands:before{content:"";display:inline-block;width:1em;height:1em;vertical-align:-.125em;background:currentColor;mask:var(--fa-icon) center/contain no-repeat;-webkit-mask:var(--fa-icon) center/contain no-repeat}'];
 for (const name of names) {
   let found = false;
   for (const variant of ['solid', 'brands', 'regular']) {
     let svg;
-    try { svg = await fs.readFile(`node_modules/@fortawesome/fontawesome-free/svgs/${variant}/${name}.svg`, 'utf8'); } catch { continue; }
+    try { svg = await fs.readFile(`node_modules/@fortawesome/fontawesome-free/svgs/${variant}/${iconAliases[name] || name}.svg`, 'utf8'); } catch { continue; }
     svg = svg.replace(/<!--[\s\S]*?-->/g, '').trim();
     rules.push(`${found && variant === 'regular' ? '.fa-regular' : ''}.fa-${name}{--fa-icon:url("data:image/svg+xml,${encodeURIComponent(svg)}")}`);
     found = true;

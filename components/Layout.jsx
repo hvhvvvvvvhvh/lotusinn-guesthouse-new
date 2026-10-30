@@ -2,14 +2,23 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import SiteImage, { optimizedImageUrl } from './SiteImage';
+import SiteImage, { optimizedImageUrl, imageSourceSet } from './SiteImage';
 import styles from '../styles/public.module.css';
+import homeStyles from '../styles/Home.module.css';
 import { isSocialProfileUrl } from '../lib/seo.js';
 
 export default function Layout({ children, initialLayout, images }) {
   const { pathname } = useRouter();
   const [siteData, setSiteData] = useState(() => initialLayout ? { layout: initialLayout } : null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const isHome = pathname === '/';
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = event => { if (event.key === 'Escape') setMenuOpen(false); };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [menuOpen]);
 
   useEffect(() => {
     if (initialLayout) { setSiteData({ layout: initialLayout }); return; }
@@ -27,12 +36,12 @@ export default function Layout({ children, initialLayout, images }) {
   const hasBanner = !pathname.startsWith('/blog') && !pathname.startsWith('/authors');
 
   return (
-    <div className={styles.surface}><div className="site-shell" style={images ? {
+    <div className={[styles.surface, isHome ? homeStyles.homeShell : ''].filter(Boolean).join(' ')}><div className="site-shell" style={images ? {
       '--site-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.hero))})`,
       '--booking-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.bookingHero))})`,
       '--contact-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.contactHero))})`,
     } : undefined}>
-      {banner && hasBanner && <Head><link rel="preload" as="image" href={optimizedImageUrl(banner)} /></Head>}
+      {banner && hasBanner && <Head><link rel="preload" as="image" href={optimizedImageUrl(banner)} imageSrcSet={isHome ? imageSourceSet(banner) : undefined} imageSizes={isHome ? '(max-width: 760px) 100vw, 1400px' : undefined} /></Head>}
       <header className="header">
         <div className="nav">
           <h2 className="logo">
@@ -50,6 +59,7 @@ export default function Layout({ children, initialLayout, images }) {
             onClick={() => setMenuOpen((prev) => !prev)}
             aria-label="Toggle navigation menu"
             aria-expanded={menuOpen}
+            aria-controls="main-navigation"
           >
             <span></span>
             <span></span>
@@ -62,7 +72,7 @@ export default function Layout({ children, initialLayout, images }) {
             aria-hidden="true"
           ></div>
 
-          <nav className={`menu ${menuOpen ? 'show' : ''}`} aria-label="Main navigation">
+          <nav id="main-navigation" className={`menu ${menuOpen ? 'show' : ''}`} aria-label="Main navigation">
             <div className="mobile-menu-logo">
               <SiteImage src={header?.logo || '/images/LotusInnLogo.png'} alt="Lotus Inn" sizes="160px" />
             </div>
