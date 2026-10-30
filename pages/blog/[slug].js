@@ -1,7 +1,6 @@
 export async function getStaticPaths() { return { paths: [], fallback: 'blocking' }; }
 import { publicPage } from '../../lib/publicPage.js';
 import SiteImage from '../../components/SiteImage';
-import Head from 'next/head';
 import Link from 'next/link';
 import { getPublicBlogs as getBlogs, getPublicAuthors as getAuthors } from '../../lib/publicBlogStore.js';
 import { safeUrl } from '../../lib/contentValidation.js';
@@ -32,16 +31,10 @@ function readingTime(blog) {
 }
 
 export default function BlogDetail({ blog, author, related }) {
-  const description = blog.metaDescription || blog.excerpt || `Read ${blog.title} from Lotus Inn Guest House.`;
   const minutes = readingTime(blog);
 
   return (
     <>
-      <Head>
-        <title>{blog.metaTitle || `${blog.title} | Lotus Inn Guest House`}</title>
-        <meta name="description" content={description.slice(0, 160)} />
-        {blog.keywords && <meta name="keywords" content={blog.keywords} />}
-      </Head>
 
       <main className="lotus-article-page">
         <div className="lotus-article-breadcrumbs">

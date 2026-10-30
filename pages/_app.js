@@ -3,6 +3,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { useEffect, useState } from 'react';
 import NavigationProgress from '../components/NavigationProgress';
 import AdminPage from '../components/AdminPage';
+import Seo from '../components/Seo';
 import '../styles/fonts.css';
 import '../styles/icons.css';
 import '../styles/shared.css';
@@ -32,14 +33,14 @@ function sanitizeMetric(event) {
   return { ...event, url: url.href };
 }
 export default function MyApp(props) {
-  return <><AppContent {...props} /><PerformanceInsights route={props.router.pathname} /></>;
+  return <><Seo route={props.router.pathname} asPath={props.router.asPath} pageProps={props.pageProps} /><AppContent {...props} /><PerformanceInsights route={props.router.pathname} /></>;
 }
 
 function PerformanceInsights({ route }) {
   const [enabled, setEnabled] = useState(false);
   useEffect(() => {
     // Some existing projects do not expose Vercel's NEXT_PUBLIC system variables.
-    setEnabled(process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' || window.location.hostname === 'lotusinn-guesthouse-new.vercel.app');
+    setEnabled(process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' || ['lotusinn-guesthouse-new.vercel.app', 'www.lotusinnguesthouse.com', 'lotusinnguesthouse.com'].includes(window.location.hostname));
   }, []);
   return enabled ? <SpeedInsights route={route} beforeSend={sanitizeMetric} debug={false} /> : null;
 }

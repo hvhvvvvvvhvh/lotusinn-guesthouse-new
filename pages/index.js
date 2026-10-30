@@ -22,7 +22,7 @@ export async function getStaticProps(context) {
   } } } };
 }
 
-export default function Home({ data }) {
+export default function Home({ data, siteLayout }) {
   const router = useRouter();
   const [dates, setDates] = useState({ checkIn: '', checkOut: '', guests: '2' });
   const updateDates = (name, event) => {
@@ -51,6 +51,11 @@ export default function Home({ data }) {
         <div className="bg_overlay"></div>
       </section>
 
+      <section className="section home-location">
+        <h2 className="section-title">Stay at Lotus Inn Guest House in Mirpur, AJK</h2>
+        <p>Find us at {siteLayout?.footer?.contact?.address || 'Kotli Road, New Mirpur City, AJK'}. Compare our <Link href="/rooms">rooms and current rates</Link>, explore <Link href="/amenities">guest house amenities</Link>, or <Link href="/contact">contact our team for directions and availability</Link> before your visit.</p>
+      </section>
+
       <section className="room_section">
         <h2 className="section-title">{home?.rooms?.title}</h2>
         <p style={{ textAlign: 'center' }} className="section-sub">
@@ -62,7 +67,7 @@ export default function Home({ data }) {
               <SiteImage src={room.image} alt={room.title} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 360px" />
               <h3>{room.title}</h3>
               <p>{room.price}</p>
-              <Link href={room.link}>{room.linkLabel}</Link>
+              <Link href={room.link} aria-label={`View ${room.title} details`}>{room.linkLabel}</Link>
             </div>
           ))}
         </div>
@@ -131,7 +136,7 @@ export default function Home({ data }) {
               <SiteImage src={post.image} alt={post.title} sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 360px" />
               <h3>{post.title}</h3>
               <p>{post.excerpt}</p>
-              <Link href={post.link}>{post.linkLabel}</Link>
+              <Link href={post.link} aria-label={`Read ${post.title}`}>{post.linkLabel}</Link>
             </div>
           ))}
         </div>

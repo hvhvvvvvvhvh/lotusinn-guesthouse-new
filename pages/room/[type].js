@@ -10,7 +10,7 @@ export async function getStaticProps(context) {
   if (!Object.hasOwn(data.roomDetails || {}, params.type)) return { notFound: true, revalidate: 60 };
   const card = data.roomsPage.availableRooms.find(item => item.slug === params.type);
   const detail = data.roomDetails[params.type];
-  return { revalidate: 60, props: { siteLayout: page.props.siteLayout, siteImages: page.props.siteImages, room: { ...detail, ...(card ? { price: card.price, availability: card.availability || 'Available' } : {}) }, type: params.type, bookingBenefits: data.bookingBenefits || [] } };
+  return { revalidate: 60, props: { siteLayout: page.props.siteLayout, siteImages: page.props.siteImages, room: { ...detail, ...(card ? { name: card.title, price: card.price, availability: card.availability || 'Available' } : {}) }, type: params.type, bookingBenefits: data.bookingBenefits || [] } };
 }
 
 const RoomDetail = ({ room, type, bookingBenefits }) => {
@@ -33,7 +33,7 @@ const RoomDetail = ({ room, type, bookingBenefits }) => {
 
       <div className="container">
         <div className="left">
-          <h1>{room.name}</h1>
+          <h2>{room.name}</h2>
 
           <div className="icons">
             {(room.icons || []).map((item, index) => (

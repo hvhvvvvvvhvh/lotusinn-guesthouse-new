@@ -111,14 +111,14 @@ export default function Layout({ children, initialLayout, images }) {
             </p>
 
             <p>
-              <strong>Phone:</strong> {footer?.contact?.phone || ''}
+              <strong>Phone:</strong> <a href={`tel:${String(footer?.contact?.phone || '').replace(/[^+\d]/g, '')}`}>{footer?.contact?.phone || ''}</a>
             </p>
             <p>
               <strong>Land Line:</strong> {footer?.contact?.landline || ''}
             </p>
 
             <p>
-              <strong>Email:</strong> {footer?.contact?.email || ''}
+              <strong>Email:</strong> <a href={`mailto:${footer?.contact?.email || ''}`}>{footer?.contact?.email || ''}</a>
             </p>
           </div>
 

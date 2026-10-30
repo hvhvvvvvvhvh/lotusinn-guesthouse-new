@@ -1607,6 +1607,8 @@ margin: 15px 0px 30px 0px;border-radius: 100px;text-decoration: none;}
 .surface :global(.site-shell) { display:contents; }
 .surface :global(.site-image) { height:auto; max-width:100%; }
 @media(max-width:768px){.surface :global(.booking-bar){grid-template-columns:minmax(0,1fr)}}
+.surface :global(.home-location){max-width:1000px;margin:0 auto;padding:36px 20px 0;text-align:center}
+.surface :global(.home-location p){line-height:1.8;color:#444}.surface :global(.home-location a){color:#036045;text-decoration:underline}
 .surface :global(.gallery-hero) {
   height: 300px;
   background: var(--site-hero-image) center/cover;

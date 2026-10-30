@@ -1,6 +1,5 @@
 import { publicPage } from '../../lib/publicPage.js';
 import SiteImage from '../../components/SiteImage';
-import Head from 'next/head';
 import Link from 'next/link';
 import { getPublicBlogs as getBlogs, getPublicAuthors as getAuthors } from '../../lib/publicBlogStore.js';
 import { publicBlog, publicAuthor } from '../../lib/publicContent.js';
@@ -33,10 +32,6 @@ export default function BlogIndex({ blogs, authors }) {
 
   return (
     <>
-      <Head>
-        <title>Insights &amp; Travel Guides | Lotus Inn Guest House</title>
-        <meta name="description" content="Helpful travel guides, local insights and practical information for guests visiting Mirpur, AJK." />
-      </Head>
 
       <main className="lotus-blog-page">
         <section className="lotus-blog-hero">
