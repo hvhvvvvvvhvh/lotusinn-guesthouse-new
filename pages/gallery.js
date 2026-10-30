@@ -35,7 +35,7 @@ export default function Gallery({ data: initialData }) {
 
       <div className="filters">
         {(galleryPage?.filters || []).map((item) => (
-          <button key={item.value} onClick={() => setFilter(item.value)}>
+          <button key={item.value} className={filter === item.value ? 'active' : ''} aria-pressed={filter === item.value} onClick={() => setFilter(item.value)}>
             {item.label}
           </button>
         ))}

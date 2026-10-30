@@ -5,7 +5,8 @@ import { useRouter } from 'next/router';
 import SiteImage, { optimizedImageUrl, imageSourceSet } from './SiteImage';
 import styles from '../styles/public.module.css';
 import homeStyles from '../styles/Home.module.css';
-import { isSocialProfileUrl } from '../lib/seo.js';
+import Footer from './Footer';
+import theme from '../styles/PublicTheme.module.css';
 
 export default function Layout({ children, initialLayout, images }) {
   const { pathname } = useRouter();
@@ -36,7 +37,7 @@ export default function Layout({ children, initialLayout, images }) {
   const hasBanner = !pathname.startsWith('/blog') && !pathname.startsWith('/authors');
 
   return (
-    <div className={[styles.surface, isHome ? homeStyles.homeShell : ''].filter(Boolean).join(' ')}><div className="site-shell" style={images ? {
+    <div className={[styles.surface, homeStyles.homeShell, theme.publicSite].join(' ')}><div className="site-shell" style={images ? {
       '--site-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.hero))})`,
       '--booking-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.bookingHero))})`,
       '--contact-hero-image': `url(${JSON.stringify(optimizedImageUrl(images.contactHero))})`,
@@ -93,66 +94,9 @@ export default function Layout({ children, initialLayout, images }) {
         </div>
       </header>
 
-      {children}
+      <div className={!isHome ? theme.content : undefined}>{children}</div>
 
-      <footer className="footer">
-        <div className="footer-top">
-          <div>
-            <h4>Quick Links</h4>
-            {(footer?.quickLinks || []).map((item, index) => (
-              <Link key={`${item.label}-${index}`} href={item.href}>
-                <p>{item.label}</p>
-              </Link>
-            ))}
-          </div>
-
-          <div>
-            <h4>Contact Us</h4>
-            <p>
-              <strong>Address:</strong>{' '}
-              {footer?.contact?.address ? (
-                <>
-                  {footer.contact.address.split(', ').slice(0, 2).join(', ')}
-                  <br />
-                  {footer.contact.address.split(', ').slice(2).join(', ')}
-                </>
-              ) : (
-                ''
-              )}
-            </p>
-
-            <p>
-              <strong>Phone:</strong> <a href={`tel:${String(footer?.contact?.phone || '').replace(/[^+\d]/g, '')}`}>{footer?.contact?.phone || ''}</a>
-            </p>
-            <p>
-              <strong>Land Line:</strong> {footer?.contact?.landline || ''}
-            </p>
-
-            <p>
-              <strong>Email:</strong> <a href={`mailto:${footer?.contact?.email || ''}`}>{footer?.contact?.email || ''}</a>
-            </p>
-          </div>
-
-          <div>
-            <h4>Follow Us</h4>
-            <div className="socials">
-              {(footer?.socials || []).filter(item => isSocialProfileUrl(item.href)).map((item, index) => (
-                <a
-                  key={index}
-                  href={item.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={/facebook/.test(item.href) ? 'Lotus Inn on Facebook' : /instagram/.test(item.href) ? 'Lotus Inn on Instagram' : /wa.me|whatsapp/.test(item.href) ? 'Contact Lotus Inn on WhatsApp' : /x.com|twitter.com/.test(item.href) ? 'Lotus Inn on X' : `Social profile ${index + 1}`}
-                >
-                  <i className={item.icon}></i>
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="footer-bottom">{footer?.copyright || ''}</div>
-      </footer>
+      <Footer footer={footer} logo={header?.logo} />
     </div></div>
   );
 }
