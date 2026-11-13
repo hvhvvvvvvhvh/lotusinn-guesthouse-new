@@ -27,7 +27,7 @@ const defaultIcons = [
   { icon:'fa-solid fa-car', label:'Parking' }
 ];
 const defaultFacilities = ['Free Wi-Fi', 'Air Conditioning', 'Attached Bathroom', 'LED TV'];
-const defaultAmenities = ['Complimentary toiletries', 'Coffee/tea setup', 'Bottled water', 'Housekeeping'];
+const defaultAmenities = ['Complimentary toiletries',  'Bottled water', 'Housekeeping'];
 const defaultReviews = [{ rating:'⭐⭐⭐⭐⭐', text:'Excellent room and peaceful stay.', name:'Guest Review' }];
 
 export default function RoomsAdmin({ initialData }) {

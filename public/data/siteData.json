@@ -133,10 +133,6 @@
           "label": "Free Wi-Fi"
         },
         {
-          "icon": "fa-solid fa-hamburger",
-          "label": "Breakfast Included"
-        },
-        {
           "icon": "fas fa-shield-alt",
           "label": "24-Hour Security"
         },
@@ -252,10 +248,6 @@
         {
           "icon": "fa-solid fa-car",
           "label": "Parking"
-        },
-        {
-          "icon": "fa-solid fa-utensils",
-          "label": "Breakfast"
         },
         {
           "icon": "fa-solid fa-snowflake",
@@ -512,10 +504,6 @@
         {
           "icon": "fa-solid fa-snowflake",
           "label": "Air Conditioning"
-        },
-        {
-          "icon": "fa-solid fa-mug-hot",
-          "label": "Breakfast"
         },
         {
           "icon": "fa-solid fa-headset",
