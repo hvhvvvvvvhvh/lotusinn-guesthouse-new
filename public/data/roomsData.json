@@ -233,11 +233,6 @@
           "text": "Cooling comfort for every season."
         },
         {
-          "icon": "fa-solid fa-mug-hot",
-          "title": "Tea & Coffee Setup",
-          "text": "Kettle, sachets and bottled water included."
-        },
-        {
           "icon": "fa-solid fa-utensils",
           "title": "Meals Available",
           "text": "Breakfast, lunch and dinner can be added."
@@ -312,8 +307,7 @@
         "Complimentary toiletries",
         "Free Wi-Fi",
         "Air conditioning",
-        "Flat-screen TV",
-        "Coffee/tea setup"
+        "Flat-screen TV"
       ],
       "availability": "Available"
     },
@@ -367,8 +361,7 @@
         "Complimentary toiletries",
         "Free Wi-Fi",
         "Air conditioning",
-        "Flat-screen TV",
-        "Coffee/tea setup"
+        "Flat-screen TV"
       ],
       "availability": "Booked"
     },
@@ -422,8 +415,7 @@
         "Complimentary toiletries",
         "Free Wi-Fi",
         "Air conditioning",
-        "Flat-screen TV",
-        "Coffee/tea setup"
+        "Flat-screen TV"
       ],
       "availability": "Booked"
     }
