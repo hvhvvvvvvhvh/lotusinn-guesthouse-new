@@ -160,10 +160,6 @@
         "label": "Free Wi-Fi"
       },
       {
-        "icon": "fa-solid fa-utensils",
-        "label": "Breakfast"
-      },
-      {
         "icon": "fa-solid fa-shield-halved",
         "label": "Security"
       },
@@ -231,11 +227,6 @@
           "icon": "fa-solid fa-snowflake",
           "title": "Air Conditioning",
           "text": "Cooling comfort for every season."
-        },
-        {
-          "icon": "fa-solid fa-utensils",
-          "title": "Meals Available",
-          "text": "Breakfast, lunch and dinner can be added."
         }
       ],
       "mealPlans": [
